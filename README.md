@@ -35,7 +35,7 @@ Table of Contents
 2. [Installation](#installation)
 3. [Usage](#usage)
    1. [KeyphraseCountVectorizer](#KeyphraseCountVectorizer)
-      1. [English language](#KeyphraseCountVectorizer)
+      1. [English language](#english-language)
       2. [Other languages](#other-languages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
    3. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
@@ -77,8 +77,10 @@ the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.htm
 
 <a name="#KeyphraseCountVectorizer"/></a>
 ### KeyphraseCountVectorizer
+
 [Back to Table of Contents](#toc)
 
+<a name="#english-language"/></a>
 #### English language
 
 ```python
