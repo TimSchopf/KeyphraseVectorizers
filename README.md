@@ -81,6 +81,7 @@ the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.htm
 #### English language
 
 ```python
+# import vectorizer 
 from keyphrase_vectorizers.keyphrase_count_vectorizer import KeyphraseCountVectorizer
 
 docs = ["""Supervised learning is the machine learning task of learning a function that
@@ -200,6 +201,7 @@ difference is, that document-keyphrase matrix cells represent tf or tf-idf value
 instead of counts.
 
 ```python
+# import vectorizer 
 from keyphrase_vectorizers.keyphrase_tfidf_vectorizer import KeyphraseTfidfVectorizer
 
 docs = ["""Supervised learning is the machine learning task of learning a function that
