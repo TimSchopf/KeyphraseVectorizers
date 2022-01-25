@@ -36,9 +36,9 @@ Table of Contents
 3. [Usage](#usage)
    1. [KeyphraseCountVectorizer](#KeyphraseCountVectorizer)
       1. [English language](#KeyphraseCountVectorizer)
-      2. [Other languages](#otherlanguages)
+      2. [Other languages](#other-languages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
-   3. [Keyphrase extraction with KeyBERT](#keybert)
+   3. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
 
 <!--te-->
 
@@ -165,7 +165,7 @@ print(document_keyphrase_matrix)
   0 0 1 0 1 0 0 1 0]]
 ```
 
-<a name="#otherlanguages"/></a>
+<a name="#other-languages"/></a>
 #### Other languages
 [Back to Table of Contents](#toc)
 
@@ -271,10 +271,8 @@ print(keyphrases)
  'output pairs']
 ```
 
-<a name="#keybert"/></a>
-
+<a name="#keyphrase-extraction-with-keybert"/></a>
 ### Keyphrase extraction with [KeyBERT](https://github.com/MaartenGr/KeyBERT "KeyBERT repository")
-
 [Back to Table of Contents](#toc)
 
 The keyphrase vectorizers can be used together with KeyBERT to extract grammatically correct keyphrases that are most
