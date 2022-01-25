@@ -327,7 +327,7 @@ docs = ["""Supervised learning is the machine learning task of learning a functi
 kw_model = KeyBERT()
 ```
 
-Instead of deciding on a suitable n-gram range which could be e.g.(1,3)...
+Instead of deciding on a suitable n-gram range which could be e.g.(1,2)...
 
 ```python
 >>> kw_model.extract_keywords(docs=docs, keyphrase_ngram_range=(1,2))
