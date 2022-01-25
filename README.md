@@ -35,8 +35,8 @@ Table of Contents
 2. [Installation](#installation)
 3. [Usage](#usage)
    1. [KeyphraseCountVectorizer](#KeyphraseCountVectorizer)
-      1. [English language](#englishlanguagecountvectorizer)
-      2. [Other languages](#otherlanguagescountvectorizer)
+      1. [English language](#englishlanguage)
+      2. [Other languages](#otherlanguages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
 
 <!--te-->
@@ -45,6 +45,7 @@ Table of Contents
 
 How does it work?
 -----------------
+[Back to Table of Contents](#toc)
 
 First, the document texts are annotated with [spaCy](https://spacy.io "spaCy homepage") part-of-speech tags. A list of
 all possible spaCy part-of-speech tags for different languages is
@@ -62,6 +63,7 @@ Finally, the vectorizers calculate document-keyphrase matrices.
 
 Installation
 ------------
+[Back to Table of Contents](#toc)
 
 ```
 pip install keyphrase-vectorizers
@@ -71,6 +73,8 @@ pip install keyphrase-vectorizers
 
 Usage
 -----
+[Back to Table of Contents](#toc)
+
 For detailed information visit
 the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.html "Keyphrase_Vectorizers API Guide").
 
@@ -78,8 +82,9 @@ the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.htm
 
 ### KeyphraseCountVectorizer
 
-<a name="#englishlanguagecountvectorizer"/></a>
+[Back to Table of Contents](#toc)
 
+<a name="#englishlanguage"/></a>
 #### English language
 
 ```python
@@ -166,9 +171,10 @@ print(document_keyphrase_matrix)
   0 0 1 0 1 0 0 1 0]]
 ```
 
-<a name="#otherlanguagescountvectorizer"/></a>
-
+<a name="#otherlanguages"/></a>
 #### Other languages
+
+[Back to Table of Contents](#toc)
 
 ```python
 german_docs = ["""Goethe stammte aus einer angesehenen bürgerlichen Familie. 
@@ -192,8 +198,9 @@ extracts keywords that have 0 or more adjectives, followed by 1 or more nouns us
 tags.
 
 <a name="#KeyphraseTfidfVectorizer"/></a>
-
 ### KeyphraseTfidfVectorizer
+
+[Back to Table of Contents](#toc)
 
 The `KeyphraseTfidfVectorizer` has the same function calls and features as the `KeyphraseCountVectorizer`. The only
 difference is, that document-keyphrase matrix cells represent tf or tf-idf values, depending on the parameter settings,
