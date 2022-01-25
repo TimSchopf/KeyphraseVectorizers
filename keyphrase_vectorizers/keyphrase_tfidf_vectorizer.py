@@ -22,9 +22,11 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     KeyphraseTfidfVectorizer converts a collection of text documents to a normalized tf or tf-idf document-token matrix.
     The tokens are keyphrases that are extracted from the text documents based on their part-of-speech tags.
-    The part-of-speech pattern of keywords can be defined by the ``pos_pattern`` parameter.
-    By default, keywords are extracted, that have 0 or more adjectives, followed by 1 or more nouns.
-    A list of extracted keywords matching the defined part-of-speech pattern can be returned after fitting via :class:`get_feature_names_out()`.
+    The matrix rows indicate the documents and columns indicate the unique keyphrases.
+    Each cell represents the tf or tf-idf value, depending on the parameter settings.
+    The part-of-speech pattern of keyphrases can be defined by the ``pos_pattern`` parameter.
+    By default, keyphrases are extracted, that have 0 or more adjectives, followed by 1 or more nouns.
+    A list of extracted keyphrases matching the defined part-of-speech pattern can be returned after fitting via :class:`get_feature_names_out()`.
 
     Attention:
         If the vectorizer is used for languages other than English, the ``spacy_pipeline`` and ``stop_words`` parameters
