@@ -35,7 +35,7 @@ Table of Contents
 2. [Installation](#installation)
 3. [Usage](#usage)
    1. [KeyphraseCountVectorizer](#KeyphraseCountVectorizer)
-      1. [English language](#englishlanguage)
+      1. [English language](#KeyphraseCountVectorizer)
       2. [Other languages](#otherlanguages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
 
@@ -45,7 +45,6 @@ Table of Contents
 
 How does it work?
 -----------------
-[Back to Table of Contents](#toc)
 
 First, the document texts are annotated with [spaCy](https://spacy.io "spaCy homepage") part-of-speech tags. A list of
 all possible spaCy part-of-speech tags for different languages is
@@ -63,7 +62,6 @@ Finally, the vectorizers calculate document-keyphrase matrices.
 
 Installation
 ------------
-[Back to Table of Contents](#toc)
 
 ```
 pip install keyphrase-vectorizers
@@ -73,18 +71,13 @@ pip install keyphrase-vectorizers
 
 Usage
 -----
-[Back to Table of Contents](#toc)
-
 For detailed information visit
 the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.html "Keyphrase_Vectorizers API Guide").
 
 <a name="#KeyphraseCountVectorizer"/></a>
-
 ### KeyphraseCountVectorizer
-
 [Back to Table of Contents](#toc)
 
-<a name="#englishlanguage"/></a>
 #### English language
 
 ```python
