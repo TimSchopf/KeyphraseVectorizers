@@ -5,7 +5,7 @@ Welcome to the Keyphrase_Vectorizers documentation!
    :maxdepth: 2
    :caption: User Guide:
    
-   POS_Token_Vectorizers
+   Keyphrase_Vectorizers
 
 .. toctree::
    :caption: API Giude:
