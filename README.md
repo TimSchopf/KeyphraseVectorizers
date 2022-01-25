@@ -38,6 +38,7 @@ Table of Contents
       1. [English language](#KeyphraseCountVectorizer)
       2. [Other languages](#otherlanguages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
+   3. [Keyphrase extraction with KeyBERT](#keybert)
 
 <!--te-->
 
@@ -81,7 +82,6 @@ the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.htm
 #### English language
 
 ```python
-# import vectorizer 
 from keyphrase_vectorizers.keyphrase_count_vectorizer import KeyphraseCountVectorizer
 
 docs = ["""Supervised learning is the machine learning task of learning a function that
@@ -167,7 +167,6 @@ print(document_keyphrase_matrix)
 
 <a name="#otherlanguages"/></a>
 #### Other languages
-
 [Back to Table of Contents](#toc)
 
 ```python
@@ -193,7 +192,6 @@ tags.
 
 <a name="#KeyphraseTfidfVectorizer"/></a>
 ### KeyphraseTfidfVectorizer
-
 [Back to Table of Contents](#toc)
 
 The `KeyphraseTfidfVectorizer` has the same function calls and features as the `KeyphraseCountVectorizer`. The only
@@ -201,7 +199,6 @@ difference is, that document-keyphrase matrix cells represent tf or tf-idf value
 instead of counts.
 
 ```python
-# import vectorizer 
 from keyphrase_vectorizers.keyphrase_tfidf_vectorizer import KeyphraseTfidfVectorizer
 
 docs = ["""Supervised learning is the machine learning task of learning a function that
@@ -273,3 +270,97 @@ print(keyphrases)
  'class labels' 'unseen instances' 'various applications' 'output'
  'output pairs']
 ```
+
+<a name="#keybert"/></a>
+
+### Keyphrase extraction with [KeyBERT](https://github.com/MaartenGr/KeyBERT "KeyBERT repository")
+
+[Back to Table of Contents](#toc)
+
+The keyphrase vectorizers can be used together with KeyBERT to extract grammatically correct keyphrases that are most
+similar to a document. Thereby, the vectorizer first extracts candidate keyphrases from the text documents, which are
+subsequently ranked by KeyBERT based on their document similarity. The top-n most similar keyphrases can then be
+considered as document keywords.
+
+The advantage of using Keyphrase_Vectorizers in addition to KeyBERT is that it allows users to get grammatically correct
+keyphrases instead of simple n-grams of pre-defined lengths. In KeyBERT, users can specify the `keyphrase_ngram_range`
+to define the length of the retrieved keyphrases. However, this raises two issues. First, users usually do not know the
+optimal n-gram range and therefore have to spend some time experimenting until they find a suitable n-gram range.
+Second, even after finding a good n-gram range, the returned keyphrases are sometimes still grammatically not quite
+correct or are slightly off-key. Unfortunately, this limits the quality of the returned keyphrases.
+
+To adress this issue, we can use the vectorizers of this package to first extract candidate keyphrases that consist of
+zero or more adjectives, followed by one or multiple nouns in a pre-processing step instead of simple n-grams.
+[Wan and Xiao](https://www.aaai.org/Papers/AAAI/2008/AAAI08-136.pdf) successfully used this noun phrase approach for
+keyphrase extraction during their research in 2008. The extracted candidate keyphrases are subsequently passed to
+KeyBERT for embedding generation and similarity calculation. To use both packages for keyphrase extraction, we need to
+pass KeyBERT a keyphrase vectorizer with the `vectorizer` parameter. Since the length of keyphrases now depends on
+part-of-speech tags, there is no need to define an n-gram length anymore.
+
+#### Example:
+
+KeyBERT can be installed via `pip install keybert`.
+
+```python
+from keyphrase_vectorizers.keyphrase_count_vectorizer import KeyphraseCountVectorizer
+from keybert import KeyBERT
+
+docs = ["""Supervised learning is the machine learning task of learning a function that
+         maps an input to an output based on example input-output pairs. It infers a
+         function from labeled training data consisting of a set of training examples.
+         In supervised learning, each example is a pair consisting of an input object
+         (typically a vector) and a desired output value (also called the supervisory signal). 
+         A supervised learning algorithm analyzes the training data and produces an inferred function, 
+         which can be used for mapping new examples. An optimal scenario will allow for the 
+         algorithm to correctly determine the class labels for unseen instances. This requires 
+         the learning algorithm to generalize from the training data to unseen situations in a 
+         'reasonable' way (see inductive bias).""", 
+             
+        """Keywords are defined as phrases that capture the main topics discussed in a document. 
+        As they offer a brief yet precise summary of document content, they can be utilized for various applications. 
+        In an information retrieval environment, they serve as an indication of document relevance for users, as the list 
+        of keywords can quickly help to determine whether a given document is relevant to their interest. 
+        As keywords reflect a document's main topics, they can be utilized to classify documents into groups 
+        by measuring the overlap between the keywords assigned to them. Keywords are also used proactively 
+        in information retrieval."""]
+
+kw_model = KeyBERT()
+```
+
+Instead of deciding on a suitable n-gram range which could be e.g.(1,3)...
+
+```python
+>>> kw_model.extract_keywords(docs=docs, keyphrase_ngram_range=(1,2))
+[[('labeled training', 0.6013),
+  ('examples supervised', 0.6112),
+  ('signal supervised', 0.6152),
+  ('supervised', 0.6676),
+  ('supervised learning', 0.6779)],
+ [('keywords assigned', 0.6354),
+  ('keywords used', 0.6373),
+  ('list keywords', 0.6375),
+  ('keywords quickly', 0.6376),
+  ('keywords defined', 0.6997)]]
+```
+
+we can now just let the keyphrase vectorizer decide on suitable keyphrases, without limitations to a maximum or minimum
+n-gram range. We only have to pass a keyphrase vectorizer as parameter to KeyBERT:
+
+```python
+>>> kw_model.extract_keywords(docs=docs, vectorizer=KeyphraseCountVectorizer())
+[[('training examples', 0.4668),
+  ('training data', 0.5271),
+  ('learning algorithm', 0.5632),
+  ('supervised learning', 0.6779),
+  ('supervised learning algorithm', 0.6992)],
+ [('given document', 0.4143),
+  ('information retrieval environment', 0.5166),
+  ('information retrieval', 0.5792),
+  ('keywords', 0.6046),
+  ('document relevance', 0.633)]]
+```
+
+This allows us to make sure that we do not cut off important words caused by defining our n-gram range too short. For
+example, we would not have found the keyphrase "supervised learning algorithm" with keyphrase_ngram_range=(1,2).
+Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled training", "signal supervised" or
+"keywords quickly".
