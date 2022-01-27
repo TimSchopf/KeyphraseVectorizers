@@ -4,9 +4,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='keyphrase_vectorizers',
-    version='0.0.1',
-    url='https://github.com/TimSchopf/Keyphrase_Vectorizers',
+    name='keyphrase-vectorizers',
+    version='0.0.2',
+    url='https://github.com/TimSchopf/KeyphraseVectorizers',
     license='BSD 3-Clause "New" or "Revised" License',
     author='Tim Schopf',
     author_email='tim.schopf@t-online.de.de',

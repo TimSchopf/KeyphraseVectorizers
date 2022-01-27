@@ -1,11 +1,11 @@
-Welcome to the Keyphrase_Vectorizers documentation!
+Welcome to the KeyphraseVectorizers documentation!
 ===================================================
  
 .. toctree::
    :maxdepth: 2
    :caption: User Guide:
    
-   Keyphrase_Vectorizers
+   KeyphraseVectorizers
 
 .. toctree::
    :caption: API Giude:

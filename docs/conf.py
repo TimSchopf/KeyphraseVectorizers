@@ -17,12 +17,12 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Keyphrase_Vectorizers'
+project = 'KeyphraseVectorizers'
 copyright = '2022, Tim Schopf'
 author = 'Tim Schopf'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.2'
 
 # -- General configuration ---------------------------------------------------
 
