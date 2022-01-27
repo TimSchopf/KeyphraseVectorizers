@@ -3,7 +3,7 @@
 [![PyPI - PyPi](https://img.shields.io/pypi/v/keyphrase-vectorizers.svg)](https://pypi.org/project/keyphrase-vectorizers/)
 [![Documentation Status](https://readthedocs.org/projects/keyphrase-vectorizers/badge/?version=latest)](https://keyphrase-vectorizers.readthedocs.io/en/latest/?badge=latest)
 
-Keyphrase_Vectorizers
+KeyphraseVectorizers
 ===================== 
 
 Set of vectorizers that extract keyphrases with part-of-speech patterns from a collection of text documents and convert
