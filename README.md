@@ -285,7 +285,7 @@ similar to a document. Thereby, the vectorizer first extracts candidate keyphras
 subsequently ranked by KeyBERT based on their document similarity. The top-n most similar keyphrases can then be
 considered as document keywords.
 
-The advantage of using Keyphrase_Vectorizers in addition to KeyBERT is that it allows users to get grammatically correct
+The advantage of using KeyphraseVectorizers in addition to KeyBERT is that it allows users to get grammatically correct
 keyphrases instead of simple n-grams of pre-defined lengths. In KeyBERT, users can specify the `keyphrase_ngram_range`
 to define the length of the retrieved keyphrases. However, this raises two issues. First, users usually do not know the
 optimal n-gram range and therefore have to spend some time experimenting until they find a suitable n-gram range.
