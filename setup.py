@@ -1,11 +1,18 @@
+from distutils.util import convert_path
+
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+main_ns = {}
+ver_path = convert_path('keyphrase_vectorizers/_version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), main_ns)
+
 setuptools.setup(
     name='keyphrase-vectorizers',
-    version='0.0.3',
+    version=main_ns['__version__'],
     url='https://github.com/TimSchopf/KeyphraseVectorizers',
     license='BSD 3-Clause "New" or "Revised" License',
     author='Tim Schopf',

@@ -12,6 +12,7 @@
 
 import os
 import sys
+from distutils.util import convert_path
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -21,8 +22,11 @@ project = 'KeyphraseVectorizers'
 copyright = '2022, Tim Schopf'
 author = 'Tim Schopf'
 
-# The full version, including alpha/beta/rc tags
-release = '0.0.3'
+main_ns = {}
+ver_path = convert_path('keyphrase_vectorizers/_version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), main_ns)
+release = main_ns['__version__']
 
 # -- General configuration ---------------------------------------------------
 
