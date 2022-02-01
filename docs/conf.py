@@ -23,7 +23,7 @@ copyright = '2022, Tim Schopf'
 author = 'Tim Schopf'
 
 main_ns = {}
-ver_path = convert_path('keyphrase_vectorizers/_version.py')
+ver_path = convert_path('../keyphrase_vectorizers/_version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 release = main_ns['__version__']
