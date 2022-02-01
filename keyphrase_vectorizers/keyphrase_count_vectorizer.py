@@ -7,6 +7,7 @@
 """
 
 import warnings
+from typing import List
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -59,8 +60,8 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         Type of the matrix returned by fit_transform() or transform().
     """
 
-    def __init__(self, spacy_pipeline='en_core_web_sm', pos_pattern='<J.*>*<N.*>+', stop_words='english',
-                 lowercase=True, binary=False, dtype=np.int64):
+    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
+                 stop_words: str = 'english', lowercase: bool = True, binary: bool = False, dtype: np.dtype = np.int64):
 
         self.spacy_pipeline = spacy_pipeline
         self.pos_pattern = pos_pattern
@@ -69,7 +70,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.binary = binary
         self.dtype = dtype
 
-    def fit(self, raw_documents):
+    def fit(self, raw_documents: List[str]) -> object:
         """
         Learn the keyphrases that match the defined part-of-speech pattern from the list of raw documents.
 
@@ -90,12 +91,17 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                                                                     pos_pattern=self.pos_pattern,
                                                                     lowercase=self.lowercase)
 
-        self.max_n_gram_length = max([len(keyphrase.split()) for keyphrase in self.keyphrases])
-        self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
+        # set n-gram range to zero if no keyphrases could be extracted
+        if self.keyphrases:
+            self.max_n_gram_length = max([len(keyphrase.split()) for keyphrase in self.keyphrases])
+            self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
+        else:
+            raise ValueError(
+                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' parameter or only contain stop words.")
 
         return self
 
-    def fit_transform(self, raw_documents):
+    def fit_transform(self, raw_documents: List[str]) -> List[List[int]]:
         """
         Learn the keyphrases that match the defined part-of-speech pattern from the list of raw documents
         and return the document-keyphrase matrix.
@@ -118,14 +124,19 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                                                                     pos_pattern=self.pos_pattern,
                                                                     lowercase=self.lowercase)
 
-        self.max_n_gram_length = max([len(keyphrase.split()) for keyphrase in self.keyphrases])
-        self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
+        # set n-gram range to zero if no keyphrases could be extracted
+        if self.keyphrases:
+            self.max_n_gram_length = max([len(keyphrase.split()) for keyphrase in self.keyphrases])
+            self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
+        else:
+            raise ValueError(
+                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' parameter or only contain stop words.")
 
         return CountVectorizer(vocabulary=self.keyphrases, ngram_range=(self.min_n_gram_length, self.max_n_gram_length),
                                lowercase=self.lowercase, binary=self.binary, dtype=self.dtype).fit_transform(
             raw_documents=raw_documents)
 
-    def transform(self, raw_documents):
+    def transform(self, raw_documents: List[str]) -> List[List[int]]:
         """
         Transform documents to document-keyphrase matrix.
         Extract token counts out of raw text documents using the keyphrases
@@ -150,7 +161,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                                lowercase=self.lowercase, binary=self.binary, dtype=self.dtype).transform(
             raw_documents=raw_documents)
 
-    def inverse_transform(self, X):
+    def inverse_transform(self, X: List[List[int]]) -> List[List[str]]:
         """
         Return keyphrases per document with nonzero entries in X.
 
@@ -176,7 +187,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         "get_feature_names() is deprecated in scikit-learn 1.0 and will be removed "
         "with scikit-learn 1.2. Please use get_feature_names_out() instead."
     )
-    def get_feature_names(self):
+    def get_feature_names(self) -> List[str]:
         """
         Array mapping from feature integer indices to feature name.
 
@@ -201,7 +212,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         except AttributeError:
             raise DeprecationWarning("get_feature_names() is deprecated. Please use 'get_feature_names_out()' instead.")
 
-    def get_feature_names_out(self):
+    def get_feature_names_out(self) -> List[str]:
         """
         Get fitted keyphrases for transformation.
 

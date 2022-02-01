@@ -79,15 +79,17 @@ For detailed information visit
 the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.html "Keyphrase_Vectorizers API Guide").
 
 <a name="#KeyphraseCountVectorizer"/></a>
+
 ### KeyphraseCountVectorizer
 
 [Back to Table of Contents](#toc)
 
 <a name="#english-language"/></a>
+
 #### English language
 
 ```python
-from keyphrase_vectorizers.keyphrase_count_vectorizer import KeyphraseCountVectorizer
+from keyphrase_vectorizers import KeyphraseCountVectorizer
 
 docs = ["""Supervised learning is the machine learning task of learning a function that
          maps an input to an output based on example input-output pairs. It infers a
@@ -171,7 +173,9 @@ print(document_keyphrase_matrix)
 ```
 
 <a name="#other-languages"/></a>
+
 #### Other languages
+
 [Back to Table of Contents](#toc)
 
 ```python
@@ -196,7 +200,9 @@ extracts keywords that have 0 or more adjectives, followed by 1 or more nouns us
 tags.
 
 <a name="#KeyphraseTfidfVectorizer"/></a>
+
 ### KeyphraseTfidfVectorizer
+
 [Back to Table of Contents](#toc)
 
 The `KeyphraseTfidfVectorizer` has the same function calls and features as the `KeyphraseCountVectorizer`. The only
@@ -204,7 +210,7 @@ difference is, that document-keyphrase matrix cells represent tf or tf-idf value
 instead of counts.
 
 ```python
-from keyphrase_vectorizers.keyphrase_tfidf_vectorizer import KeyphraseTfidfVectorizer
+from keyphrase_vectorizers import KeyphraseTfidfVectorizer
 
 docs = ["""Supervised learning is the machine learning task of learning a function that
          maps an input to an output based on example input-output pairs. It infers a
@@ -277,7 +283,9 @@ print(keyphrases)
 ```
 
 <a name="#keyphrase-extraction-with-keybert"/></a>
+
 ### Keyphrase extraction with [KeyBERT](https://github.com/MaartenGr/KeyBERT "KeyBERT repository")
+
 [Back to Table of Contents](#toc)
 
 The keyphrase vectorizers can be used together with KeyBERT to extract grammatically correct keyphrases that are most
@@ -305,7 +313,7 @@ part-of-speech tags, there is no need to define an n-gram length anymore.
 KeyBERT can be installed via `pip install keybert`.
 
 ```python
-from keyphrase_vectorizers.keyphrase_count_vectorizer import KeyphraseCountVectorizer
+from keyphrase_vectorizers import KeyphraseCountVectorizer
 from keybert import KeyBERT
 
 docs = ["""Supervised learning is the machine learning task of learning a function that

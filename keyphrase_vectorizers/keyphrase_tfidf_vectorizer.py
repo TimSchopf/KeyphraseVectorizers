@@ -7,6 +7,7 @@
 """
 
 import warnings
+from typing import List
 
 import numpy as np
 from sklearn.exceptions import NotFittedError
@@ -104,9 +105,11 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     """
 
-    def __init__(self, spacy_pipeline='en_core_web_sm', pos_pattern='<J.*>*<N.*>+', stop_words='english',
-                 lowercase=True, binary=False, dtype=np.float64, norm="l2", use_idf=True, smooth_idf=True,
-                 sublinear_tf=False):
+    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
+                 stop_words: str = 'english',
+                 lowercase: bool = True, binary: bool = False, dtype: np.dtype = np.float64, norm: str = "l2",
+                 use_idf: bool = True, smooth_idf: bool = True,
+                 sublinear_tf: bool = False):
 
         self.spacy_pipeline = spacy_pipeline
         self.pos_pattern = pos_pattern
@@ -137,7 +140,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                 UserWarning,
             )
 
-    def fit(self, raw_documents):
+    def fit(self, raw_documents: List[str]) -> object:
         """Learn the keyphrases that match the defined part-of-speech pattern and idf from the list of raw documents.
 
         Parameters
@@ -156,7 +159,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         self._tfidf.fit(X)
         return self
 
-    def fit_transform(self, raw_documents):
+    def fit_transform(self, raw_documents: List[str]) -> List[List[float]]:
         """
         Learn the keyphrases that match the defined part-of-speech pattern and idf from the list of raw documents.
         Then return document-keyphrase matrix.
@@ -180,7 +183,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         # we set copy to False
         return self._tfidf.transform(X, copy=False)
 
-    def transform(self, raw_documents):
+    def transform(self, raw_documents: List[str]) -> List[List[float]]:
         """
         Transform documents to document-keyphrase matrix.
         Uses the keyphrases and document frequencies (df) learned by fit (or fit_transform).

@@ -5,6 +5,9 @@
 .. _regex pattern: https://docs.python.org/3/library/re.html#regular-expression-syntax
 """
 
+import logging
+from typing import List
+
 import spacy
 from nltk import RegexpParser
 from nltk.corpus import stopwords
@@ -17,7 +20,7 @@ class _KeyphraseVectorizerMixin():
     Provides common code for text vectorizers.
     """
 
-    def _remove_suffixes(self, text: str, suffixes: list) -> str:
+    def _remove_suffixes(self, text: str, suffixes: List[str]) -> str:
         """
         Removes pre-defined suffixes from a given text string.
 
@@ -39,7 +42,7 @@ class _KeyphraseVectorizerMixin():
                 return text[:-len(suffix)].strip()
         return text
 
-    def _remove_prefixes(self, text: str, prefixes: list) -> str:
+    def _remove_prefixes(self, text: str, prefixes: List[str]) -> str:
         """
         Removes pre-defined prefixes from a given text string.
 
@@ -62,7 +65,7 @@ class _KeyphraseVectorizerMixin():
         return text
 
     def _get_pos_keyphrases(self, document: str, stop_words: str, spacy_pipeline: str, pos_pattern: str,
-                            lowercase=True) -> list:
+                            lowercase: bool = True) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
 
@@ -121,9 +124,20 @@ class _KeyphraseVectorizerMixin():
         # add spaCy POS tags for document
         try:
             nlp = spacy.load(spacy_pipeline)
-        except:
+        except OSError:
+            # set logger
+            logger = logging.getLogger('KeyphraseVectorizer')
+            logger.setLevel(logging.WARNING)
+            sh = logging.StreamHandler()
+            sh.setFormatter(logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            logger.addHandler(sh)
+            logger.setLevel(logging.DEBUG)
+            logger.info(
+                'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
             spacy.cli.download(spacy_pipeline)
             nlp = spacy.load(spacy_pipeline)
+
         tagged_doc = nlp(document)
         tagged_pos_doc = []
         for sentence in tagged_doc.sents:
@@ -166,8 +180,8 @@ class _KeyphraseVectorizerMixin():
 
         return list(set(keyphrases))
 
-    def _get_pos_keyphrases_of_multiple_docs(self, document_list: str, stop_words: str, spacy_pipeline: str,
-                                             pos_pattern: str, lowercase=True) -> list:
+    def _get_pos_keyphrases_of_multiple_docs(self, document_list: List[str], stop_words: str, spacy_pipeline: str,
+                                             pos_pattern: str, lowercase: bool = True) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a list of text documents.
 
