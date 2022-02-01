@@ -22,7 +22,7 @@ copyright = '2022, Tim Schopf'
 author = 'Tim Schopf'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2'
+release = '0.0.3'
 
 # -- General configuration ---------------------------------------------------
 
