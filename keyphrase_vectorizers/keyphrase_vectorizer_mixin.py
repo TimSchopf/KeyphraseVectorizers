@@ -6,6 +6,7 @@
 """
 
 import logging
+import os
 from typing import List
 
 import spacy
@@ -64,15 +65,14 @@ class _KeyphraseVectorizerMixin():
                 return text[len(prefix):].strip()
         return text
 
-    def _get_pos_keyphrases(self, document: str, stop_words: str, spacy_pipeline: str, pos_pattern: str,
-                            lowercase: bool = True) -> List[str]:
+    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str,
+                            lowercase: bool = True, multiprocessing: bool = False) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
-
         Parameters
         ----------
-        document :  str
-            Text document from which to extract the keyphrases.
+        document_list : list of str
+            List of text documents from which to extract the keyphrases.
 
         stop_words : str
             Language of stopwords to remove from the document, e.g.'english.
@@ -88,15 +88,28 @@ class _KeyphraseVectorizerMixin():
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.
 
+        multiprocessing : bool, default=False
+            Whether to use multiprocessing for spaCy POS tagging.
+            If True, spaCy uses all cores to POS tag documents.
+            Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
+            In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
+            Therefore, carefully consider whether this option is really necessary.
+
         Returns
         -------
         keyphrases : List of unique keyphrases of varying length, extracted from the text document with the defined 'pos_pattern'.
         """
 
         # triggers a parameter validation
-        if not isinstance(document, str):
+        if isinstance(document_list, str):
             raise ValueError(
-                "Given document is not a string."
+                "Iterable over raw text documents expected, string object received."
+            )
+
+        # triggers a parameter validation
+        if not hasattr(document_list, '__iter__'):
+            raise ValueError(
+                "Iterable over raw text documents expected."
             )
 
         # triggers a parameter validation
@@ -121,9 +134,11 @@ class _KeyphraseVectorizerMixin():
         if stop_words:
             stop_words_list = set(stopwords.words(stop_words))
 
-        # add spaCy POS tags for document
+        # add spaCy POS tags for documents
         try:
-            nlp = spacy.load(spacy_pipeline)
+            nlp = spacy.load(spacy_pipeline,
+                             exclude=['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
+                                      'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer'])
         except OSError:
             # set logger
             logger = logging.getLogger('KeyphraseVectorizer')
@@ -136,94 +151,57 @@ class _KeyphraseVectorizerMixin():
             logger.info(
                 'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
             spacy.cli.download(spacy_pipeline)
-            nlp = spacy.load(spacy_pipeline)
+            nlp = spacy.load(spacy_pipeline,
+                             exclude=['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
+                                      'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer'])
 
-        tagged_doc = nlp(document)
-        tagged_pos_doc = []
-        for sentence in tagged_doc.sents:
-            pos_tagged_sentence = []
-            for word in sentence:
-                pos_tagged_sentence.append((word.text, word.tag_))
-            tagged_pos_doc.append(pos_tagged_sentence)
+        keyphrases_list = []
+        if multiprocessing:
+            num_workers = -1
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        else:
+            num_workers = 1
 
-        # extract keyphrases that match the NLTK RegexpParser filter
         cp = RegexpParser('CHUNK: {(' + pos_pattern + ')}')
-        keyphrases = []
-        prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
-        suffix_list = [' ' + stop_word for stop_word in stop_words_list]
-        for sentence in tagged_pos_doc:
-            tree = cp.parse(sentence)
-            for subtree in tree.subtrees():
-                if subtree.label() == 'CHUNK':
-                    # join candidate keyphrase from single words
-                    keyphrase = ' '.join([i[0] for i in subtree.leaves()])
+        for tagged_doc in nlp.pipe(document_list, n_process=num_workers):
+            tagged_pos_doc = []
+            for sentence in tagged_doc.sents:
+                pos_tagged_sentence = []
+                for word in sentence:
+                    pos_tagged_sentence.append((word.text, word.tag_))
+                tagged_pos_doc.append(pos_tagged_sentence)
 
-                    # convert keyphrase to lowercase
-                    if lowercase:
-                        keyphrase = keyphrase.lower()
+            # extract keyphrases that match the NLTK RegexpParser filter
+            keyphrases = []
+            prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
+            suffix_list = [' ' + stop_word for stop_word in stop_words_list]
+            for sentence in tagged_pos_doc:
+                tree = cp.parse(sentence)
+                for subtree in tree.subtrees():
+                    if subtree.label() == 'CHUNK':
+                        # join candidate keyphrase from single words
+                        keyphrase = ' '.join([i[0] for i in subtree.leaves()])
 
-                    # remove stopword suffixes
-                    keyphrase = self._remove_suffixes(keyphrase, suffix_list)
+                        # convert keyphrase to lowercase
+                        if lowercase:
+                            keyphrase = keyphrase.lower()
 
-                    # remove stopword prefixes
-                    keyphrase = self._remove_prefixes(keyphrase, prefix_list)
+                        # remove stopword suffixes
+                        keyphrase = self._remove_suffixes(keyphrase, suffix_list)
 
-                    # remove whitespace from the beginning and end of keyphrases
-                    keyphrase = keyphrase.strip()
+                        # remove stopword prefixes
+                        keyphrase = self._remove_prefixes(keyphrase, prefix_list)
 
-                    # do not include single keywords that are actually stopwords
-                    if keyphrase.lower() not in stop_words_list:
-                        keyphrases.append(keyphrase)
+                        # remove whitespace from the beginning and end of keyphrases
+                        keyphrase = keyphrase.strip()
 
-        # remove potential empty keyphrases
-        keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
+                        # do not include single keywords that are actually stopwords
+                        if keyphrase.lower() not in stop_words_list:
+                            keyphrases.append(keyphrase)
 
-        return list(set(keyphrases))
+            # remove potential empty keyphrases
+            keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
 
-    def _get_pos_keyphrases_of_multiple_docs(self, document_list: List[str], stop_words: str, spacy_pipeline: str,
-                                             pos_pattern: str, lowercase: bool = True) -> List[str]:
-        """
-        Select keyphrases with part-of-speech tagging from a list of text documents.
+            keyphrases_list.append(list(set(keyphrases)))
 
-        Parameters
-        ----------
-        document_list : list of str
-            List of text documents from which to extract the keyphrases.
-
-        stop_words : str
-            Language of stopwords to remove from the document, e.g.'english.
-            Supported options are `stopwords available in NLTK`_.
-            Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
-
-        spacy_pipeline : str
-            The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text.
-
-        pos_pattern : str
-            The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
-
-        lowercase : bool, default=True
-            Whether the returned keyphrases should be converted to lowercase.
-
-        Returns
-        -------
-        keyphrases : List of unique keyphrases of varying length, extracted from the given text documents with the given 'pos_pattern'.
-        """
-
-        # triggers a parameter validation
-        if isinstance(document_list, str):
-            raise ValueError(
-                "Iterable over raw text documents expected, string object received."
-            )
-
-        # triggers a parameter validation
-        if not hasattr(document_list, '__iter__'):
-            raise ValueError(
-                "Iterable over raw text documents expected."
-            )
-
-        keyphrases = [
-            self._get_pos_keyphrases(document=doc, stop_words=stop_words, spacy_pipeline=spacy_pipeline,
-                                     pos_pattern=pos_pattern, lowercase=lowercase) for doc in document_list]
-        keyphrases = [keyphrase for sub_keyphrase_list in keyphrases for keyphrase in
-                      sub_keyphrase_list]
-        return list(set(keyphrases))
+        return list(set([keyphrase for sub_keyphrase_list in keyphrases_list for keyphrase in sub_keyphrase_list]))

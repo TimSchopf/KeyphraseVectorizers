@@ -80,6 +80,13 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
     lowercase : bool, default=True
         Whether the returned keyphrases should be converted to lowercase.
 
+    multiprocessing : bool, default=False
+            Whether to use multiprocessing for spaCy part-of-speech tagging.
+            If True, spaCy uses all cores to tag documents with part-of-speech.
+            Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
+            In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
+            Therefore, carefully consider whether this option is really necessary.
+
     binary : bool, default=False
         If True, all non zero counts are set to 1.
         This is useful for discrete probabilistic models that model binary events rather than integer counts.
@@ -107,7 +114,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: str = 'english',
-                 lowercase: bool = True, binary: bool = False, dtype: np.dtype = np.float64, norm: str = "l2",
+                 lowercase: bool = True, multiprocessing: bool = False, binary: bool = False,
+                 dtype: np.dtype = np.float64, norm: str = "l2",
                  use_idf: bool = True, smooth_idf: bool = True,
                  sublinear_tf: bool = False):
 
@@ -115,6 +123,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         self.pos_pattern = pos_pattern
         self.stop_words = stop_words
         self.lowercase = lowercase
+        self.multiprocessing = multiprocessing
         self.binary = binary
         self.dtype = dtype
         self.norm = norm
@@ -126,7 +135,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                                        sublinear_tf=self.sublinear_tf)
 
         super().__init__(spacy_pipeline=self.spacy_pipeline, pos_pattern=self.pos_pattern, stop_words=self.stop_words,
-                         lowercase=self.lowercase, binary=self.binary, dtype=self.dtype)
+                         lowercase=self.lowercase, multiprocessing=self.multiprocessing, binary=self.binary,
+                         dtype=self.dtype)
 
     def _check_params(self):
         """

@@ -52,6 +52,13 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
     lowercase : bool, default=True
         Whether the returned keyphrases should be converted to lowercase.
 
+    multiprocessing : bool, default=False
+            Whether to use multiprocessing for spaCy part-of-speech tagging.
+            If True, spaCy uses all cores to tag documents with part-of-speech.
+            Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
+            In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
+            Therefore, carefully consider whether this option is really necessary.
+
     binary : bool, default=False
         If True, all non zero counts are set to 1.
         This is useful for discrete probabilistic models that model binary events rather than integer counts.
@@ -61,12 +68,14 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
     """
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
-                 stop_words: str = 'english', lowercase: bool = True, binary: bool = False, dtype: np.dtype = np.int64):
+                 stop_words: str = 'english', lowercase: bool = True, multiprocessing: bool = False,
+                 binary: bool = False, dtype: np.dtype = np.int64):
 
         self.spacy_pipeline = spacy_pipeline
         self.pos_pattern = pos_pattern
         self.stop_words = stop_words
         self.lowercase = lowercase
+        self.multiprocessing = multiprocessing
         self.binary = binary
         self.dtype = dtype
 
@@ -85,11 +94,11 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             Fitted vectorizer.
         """
 
-        self.keyphrases = self._get_pos_keyphrases_of_multiple_docs(document_list=raw_documents,
-                                                                    stop_words=self.stop_words,
-                                                                    spacy_pipeline=self.spacy_pipeline,
-                                                                    pos_pattern=self.pos_pattern,
-                                                                    lowercase=self.lowercase)
+        self.keyphrases = self._get_pos_keyphrases(document_list=raw_documents,
+                                                   stop_words=self.stop_words,
+                                                   spacy_pipeline=self.spacy_pipeline,
+                                                   pos_pattern=self.pos_pattern,
+                                                   lowercase=self.lowercase, multiprocessing=self.multiprocessing)
 
         # set n-gram range to zero if no keyphrases could be extracted
         if self.keyphrases:
@@ -118,11 +127,11 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             Document-keyphrase matrix.
         """
 
-        self.keyphrases = self._get_pos_keyphrases_of_multiple_docs(document_list=raw_documents,
-                                                                    stop_words=self.stop_words,
-                                                                    spacy_pipeline=self.spacy_pipeline,
-                                                                    pos_pattern=self.pos_pattern,
-                                                                    lowercase=self.lowercase)
+        self.keyphrases = self._get_pos_keyphrases(document_list=raw_documents,
+                                                   stop_words=self.stop_words,
+                                                   spacy_pipeline=self.spacy_pipeline,
+                                                   pos_pattern=self.pos_pattern,
+                                                   lowercase=self.lowercase, multiprocessing=self.multiprocessing)
 
         # set n-gram range to zero if no keyphrases could be extracted
         if self.keyphrases:
@@ -212,7 +221,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         except AttributeError:
             raise DeprecationWarning("get_feature_names() is deprecated. Please use 'get_feature_names_out()' instead.")
 
-    def get_feature_names_out(self) -> List[str]:
+    def get_feature_names_out(self) -> np.array(str):
         """
         Get fitted keyphrases for transformation.
 
