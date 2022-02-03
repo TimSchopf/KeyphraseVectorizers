@@ -115,7 +115,7 @@ vectorizer = KeyphraseCountVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->>> {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english'}
+>>> {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'multiprocessing': False, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english'}
 ```
 
 By default, the vectorizer is initialized for the English language. That means, an English `spacy_pipeline` is
@@ -236,7 +236,7 @@ vectorizer = KeyphraseTfidfVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->>> {'binary': False, 'dtype': <class 'numpy.float64'>, 'lowercase': True, 'norm': 'l2', 'pos_pattern': '<J.*>*<N.*>+', 'smooth_idf': True, 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'sublinear_tf': False, 'use_idf': True}
+>>> {'binary': False, 'dtype': <class 'numpy.float64'>, 'lowercase': True, 'multiprocessing': False, 'norm': 'l2', 'pos_pattern': '<J.*>*<N.*>+', 'smooth_idf': True, 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'sublinear_tf': False, 'use_idf': True}
 ```
 
 To calculate tf values instead, set `use_idf=False`.
