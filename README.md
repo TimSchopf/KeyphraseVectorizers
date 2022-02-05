@@ -42,7 +42,7 @@ Table of Contents
       2. [Other languages](#other-languages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
    3. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
-   4. [Topic modeling with BERTopic and KeyphraseVectorizers](#keyphrase-topic-modeling-with-bertopic)
+   4. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
 
 <!--te-->
 
@@ -377,7 +377,7 @@ example, we would not have found the keyphrase "supervised learning algorithm" w
 Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled training", "signal supervised" or
 "keywords quickly".
 
-<a name="#keyphrase-topic-modeling-with-bertopic"/></a>
+<a name="#topic-modeling-with-bertopic-and-keyphrasevectorizers"/></a>
 
 ### Topic modeling with [BERTopic](https://github.com/MaartenGr/BERTopic "BERTopic repository") and KeyphraseVectorizers
 
