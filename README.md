@@ -42,6 +42,7 @@ Table of Contents
       2. [Other languages](#other-languages)
    2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
    3. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
+   4. [Topic modeling with BERTopic and KeyphraseVectorizers](#keyphrase-topic-modeling-with-bertopic)
 
 <!--te-->
 
@@ -375,3 +376,135 @@ This allows us to make sure that we do not cut off important words caused by def
 example, we would not have found the keyphrase "supervised learning algorithm" with keyphrase_ngram_range=(1,2).
 Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled training", "signal supervised" or
 "keywords quickly".
+
+<a name="#keyphrase-topic-modeling-with-bertopic"/></a>
+
+### Topic modeling with [BERTopic](https://github.com/MaartenGr/BERTopic "BERTopic repository") and KeyphraseVectorizers
+
+[Back to Table of Contents](#toc)
+
+Similar to the use with KeyBERT, the keyphrase vectorizers can be used to obtain grammatically correct keyphrases as
+descriptions for topics instead of simple n-grams. This allows us to make sure that we do not cut off important topic
+description keyphrases by defining our n-gram range too short. Moreover, we don't need to clean stopwords upfront, can
+get more precise topic models and avoid to get topic description keyphrases that are slightly off-key.
+
+BERTopic can be installed via `pip install bertopic`.
+
+```python
+from keyphrase_vectorizers import KeyphraseCountVectorizer
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+
+# load text documents
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+# only use a subset of the data set
+docs = docs[:5000]
+
+# train topic model with KeyphraseCountVectorizer
+keyphrase_topic_model = BERTopic(vectorizer_model=KeyphraseCountVectorizer())
+keyphrase_topics, keyphrase_probs = keyphrase_topic_model.fit_transform(docs)
+
+# get topics
+>>> keyphrase_topic_model.topics
+{-1: [('file', 0.007265527630674131),
+  ('one', 0.007055454904474792),
+  ('use', 0.00633563957153475),
+  ('program', 0.006053271092949018),
+  ('get', 0.006011060091056076),
+  ('people', 0.005729309058970368),
+  ('know', 0.005635951168273583),
+  ('like', 0.0055692449802916015),
+  ('time', 0.00527028825803415),
+  ('us', 0.00525564504880084)],
+ 0: [('game', 0.024134589719090525),
+  ('team', 0.021852806383170772),
+  ('players', 0.01749406934044139),
+  ('games', 0.014397938026886745),
+  ('hockey', 0.013932342023677305),
+  ('win', 0.013706115572901401),
+  ('year', 0.013297593024390321),
+  ('play', 0.012533185558169046),
+  ('baseball', 0.012412743802062559),
+  ('season', 0.011602725885164318)],
+ 1: [('patients', 0.022600352291162015),
+  ('msg', 0.02023877371575874),
+  ('doctor', 0.018816282737587457),
+  ('medical', 0.018614407917995103),
+  ('treatment', 0.0165028251400717),
+  ('food', 0.01604980195180696),
+  ('candida', 0.015255961242066143),
+  ('disease', 0.015115496310099693),
+  ('pain', 0.014129703072484495),
+  ('hiv', 0.012884503220341102)],
+ 2: [('key', 0.028851633177510126),
+  ('encryption', 0.024375137861044675),
+  ('clipper', 0.023565947302544528),
+  ('privacy', 0.019258719348097385),
+  ('security', 0.018983682856076434),
+  ('chip', 0.018822199098878365),
+  ('keys', 0.016060139239615384),
+  ('internet', 0.01450486904722165),
+  ('encrypted', 0.013194373119964168),
+  ('government', 0.01303978311708837)],
+  ...
+```
+
+The same topics looks a bit different when no keyphrase vectorizer is used:
+
+```python
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+
+# load text documents
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+# only use a subset of the data set
+docs = docs[:5000]
+
+# train topic model without KeyphraseCountVectorizer
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(docs)
+
+# get topics
+>>> topic_model.topics
+{-1: [('the', 0.012864641020408933),
+  ('to', 0.01187920529994724),
+  ('and', 0.011431498631699856),
+  ('of', 0.01099851927541331),
+  ('is', 0.010995478673036962),
+  ('in', 0.009908233622158523),
+  ('for', 0.009903667215879675),
+  ('that', 0.009619596716087699),
+  ('it', 0.009578499681829809),
+  ('you', 0.0095328846440753)],
+ 0: [('game', 0.013949166096523719),
+  ('team', 0.012458483177116456),
+  ('he', 0.012354733462693834),
+  ('the', 0.01119583508278812),
+  ('10', 0.010190243555226108),
+  ('in', 0.0101436249231417),
+  ('players', 0.009682212470082758),
+  ('to', 0.00933700544705287),
+  ('was', 0.009172402203816335),
+  ('and', 0.008653375901739337)],
+ 1: [('of', 0.012771267188340924),
+  ('to', 0.012581337590513296),
+  ('is', 0.012554884458779008),
+  ('patients', 0.011983273578628046),
+  ('and', 0.011863499662237566),
+  ('that', 0.011616113472989725),
+  ('it', 0.011581944987387165),
+  ('the', 0.011475148304229873),
+  ('in', 0.011395485985801054),
+  ('msg', 0.010715000656335596)],
+ 2: [('key', 0.01725282988290282),
+  ('the', 0.014634841495851404),
+  ('be', 0.014429762197907552),
+  ('encryption', 0.013530733999898166),
+  ('to', 0.013443159534369817),
+  ('clipper', 0.01296614319927958),
+  ('of', 0.012164734232650158),
+  ('is', 0.012128295958613464),
+  ('and', 0.011972763728732667),
+  ('chip', 0.010785744492767285)],
+ ...
+```
