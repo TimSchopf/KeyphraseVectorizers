@@ -87,6 +87,13 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
 
+    max_df : int, default=None
+        During fitting ignore keyphrases that have a document frequency strictly higher than the given threshold.
+
+    min_df : int, default=None
+        During fitting ignore keyphrases that have a document frequency strictly lower than the given threshold.
+        This value is also called cut-off in the literature.
+
     binary : bool, default=False
         If True, all non zero counts are set to 1.
         This is useful for discrete probabilistic models that model binary events rather than integer counts.
@@ -114,7 +121,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: str = 'english',
-                 lowercase: bool = True, multiprocessing: bool = False, binary: bool = False,
+                 lowercase: bool = True, multiprocessing: bool = False, max_df: int = None, min_df: int = None,
+                 binary: bool = False,
                  dtype: np.dtype = np.float64, norm: str = "l2",
                  use_idf: bool = True, smooth_idf: bool = True,
                  sublinear_tf: bool = False):
@@ -124,6 +132,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         self.stop_words = stop_words
         self.lowercase = lowercase
         self.multiprocessing = multiprocessing
+        self.max_df = max_df
+        self.min_df = min_df
         self.binary = binary
         self.dtype = dtype
         self.norm = norm
@@ -135,7 +145,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                                        sublinear_tf=self.sublinear_tf)
 
         super().__init__(spacy_pipeline=self.spacy_pipeline, pos_pattern=self.pos_pattern, stop_words=self.stop_words,
-                         lowercase=self.lowercase, multiprocessing=self.multiprocessing, binary=self.binary,
+                         lowercase=self.lowercase, multiprocessing=self.multiprocessing, max_df=self.max_df,
+                         min_df=self.min_df, binary=self.binary,
                          dtype=self.dtype)
 
     def _check_params(self):

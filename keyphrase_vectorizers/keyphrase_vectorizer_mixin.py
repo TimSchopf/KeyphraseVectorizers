@@ -9,6 +9,8 @@ import logging
 import os
 from typing import List
 
+import numpy as np
+import scipy.sparse as sp
 import spacy
 from nltk import RegexpParser
 from nltk.corpus import stopwords
@@ -20,6 +22,26 @@ class _KeyphraseVectorizerMixin():
 
     Provides common code for text vectorizers.
     """
+
+    def _document_frequency(self, document_keyphrase_count_matrix: List[List[int]]) -> np.array:
+        """
+        Count the number of non-zero values for each feature in sparse a matrix.
+
+        Parameters
+        ----------
+        document_keyphrase_count_matrix : list of integer lists
+                The document-keyphrase count matrix to transform to document frequencies
+
+        Returns
+        -------
+        document_frequencies : np.array
+            Numpy array of document frequencies for keyphrases
+        """
+        document_keyphrase_count_matrix = sp.csr_matrix(document_keyphrase_count_matrix)
+        document_frequencies = np.bincount(document_keyphrase_count_matrix.indices,
+                                           minlength=document_keyphrase_count_matrix.shape[1])
+
+        return document_frequencies
 
     def _remove_suffixes(self, text: str, suffixes: List[str]) -> str:
         """
@@ -64,6 +86,98 @@ class _KeyphraseVectorizerMixin():
             if text.lower().startswith(prefix.lower()):
                 return text[len(prefix):].strip()
         return text
+
+    def _cumulative_length_joiner(self, text_list: List[str], max_text_length: int) -> List[str]:
+        """
+        Joins strings from list of strings to single string until maximum char length is reached.
+        Then join the next strings from list to a single string and so on.
+
+        Parameters
+        ----------
+        text_list : list of strings
+            List of strings to join.
+
+        max_text_length : int
+            Maximun character length of the joined strings.
+
+        Returns
+        -------
+        list_of_joined_srings_with_max_length : List of joined text strings with max char length of 'max_text_length.
+        """
+
+        # triggers a parameter validation
+        if isinstance(text_list, str):
+            raise ValueError(
+                "Iterable over raw texts expected, string object received."
+            )
+
+        # triggers a parameter validation
+        if not hasattr(text_list, '__iter__'):
+            raise ValueError(
+                "Iterable over texts expected."
+            )
+
+        text_list_len = len(text_list) - 1
+        list_of_joined_srings_with_max_length = []
+        one_string = ''
+        for index, text in enumerate(text_list):
+            # Add the text to the substring if it doesn't make it to large
+            if len(one_string) + len(text) < max_text_length:
+                one_string += ' ' + text
+                if index == text_list_len:
+                    list_of_joined_srings_with_max_length.append(one_string)
+
+            # Substring too large, so add to the list and reset
+            else:
+                list_of_joined_srings_with_max_length.append(one_string)
+                one_string = text
+                if index == text_list_len:
+                    list_of_joined_srings_with_max_length.append(one_string)
+        return list_of_joined_srings_with_max_length
+
+    def _split_long_document(self, text: str, max_text_length: int) -> List[str]:
+        """
+        Split single string in list of strings with a maximum character length.
+
+        Parameters
+        ----------
+        text : str
+            Text string that should be split.
+
+        max_text_length : int
+            Maximun character length of the strings.
+
+        Returns
+        -------
+        splitted_document : List of text strings.
+        """
+        # triggers a parameter validation
+        if not isinstance(text, str):
+            raise ValueError(
+                "'text' parameter needs to be a string."
+            )
+
+        # triggers a parameter validation
+        if not isinstance(max_text_length, int):
+            raise ValueError(
+                "'max_text_length' parameter needs to be a int"
+            )
+
+        text = text.replace("? ", "?<stop>")
+        text = text.replace("! ", "!<stop>")
+        if "<stop>" in text:
+            splitted_document = text.split("<stop>")
+            splitted_document = splitted_document[:-1]
+            splitted_document = [s.strip() for s in splitted_document]
+            splitted_document = [
+                self._cumulative_length_joiner(text_list=doc.split(" "), max_text_length=max_text_length) if len(
+                    doc) > max_text_length else [doc] for doc in splitted_document]
+            return [text for doc in splitted_document for text in doc]
+        else:
+            splitted_document = text.split(" ")
+            splitted_document = self._cumulative_length_joiner(text_list=splitted_document,
+                                                               max_text_length=max_text_length)
+            return splitted_document
 
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str,
                             lowercase: bool = True, multiprocessing: bool = False) -> List[str]:
@@ -135,10 +249,12 @@ class _KeyphraseVectorizerMixin():
             stop_words_list = set(stopwords.words(stop_words))
 
         # add spaCy POS tags for documents
+        spacy_exclude = ['parser', 'ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
+                         'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer']
         try:
             nlp = spacy.load(spacy_pipeline,
-                             exclude=['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
-                                      'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer'])
+                             exclude=spacy_exclude)
+
         except OSError:
             # set logger
             logger = logging.getLogger('KeyphraseVectorizer')
@@ -152,8 +268,10 @@ class _KeyphraseVectorizerMixin():
                 'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
             spacy.cli.download(spacy_pipeline)
             nlp = spacy.load(spacy_pipeline,
-                             exclude=['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
-                                      'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer'])
+                             exclude=spacy_exclude)
+
+        # add rule based sentence boundary detection
+        nlp.add_pipe('sentencizer')
 
         keyphrases_list = []
         if multiprocessing:
@@ -161,6 +279,22 @@ class _KeyphraseVectorizerMixin():
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
         else:
             num_workers = 1
+
+        # split large documents in smaller chunks, so that spacy can process them without memory issues
+        docs_list = []
+        # set maximal character length of documents for spaCy processing
+        max_doc_length = 1000000
+        for document in document_list:
+            if len(document) > max_doc_length:
+                docs_list.append(self._split_long_document(text=document, max_text_length=max_doc_length))
+            else:
+                docs_list.append([document])
+        document_list = [text for split_text in docs_list for text in split_text]
+        del docs_list
+
+        # increase max length of documents that spaCy can parse
+        # (should only be done if parser and ner are not used due to memory issues)
+        nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
         cp = RegexpParser('CHUNK: {(' + pos_pattern + ')}')
         for tagged_doc in nlp.pipe(document_list, n_process=num_workers):

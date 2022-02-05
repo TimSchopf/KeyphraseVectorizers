@@ -59,6 +59,13 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
 
+    max_df : int, default=None
+        During fitting ignore keyphrases that have a document frequency strictly higher than the given threshold.
+
+    min_df : int, default=None
+        During fitting ignore keyphrases that have a document frequency strictly lower than the given threshold.
+        This value is also called cut-off in the literature.
+
     binary : bool, default=False
         If True, all non zero counts are set to 1.
         This is useful for discrete probabilistic models that model binary events rather than integer counts.
@@ -68,14 +75,46 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
     """
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
-                 stop_words: str = 'english', lowercase: bool = True, multiprocessing: bool = False,
+                 stop_words: str = 'english', lowercase: bool = True, multiprocessing: bool = False, max_df: int = None,
+                 min_df: int = None,
                  binary: bool = False, dtype: np.dtype = np.int64):
+
+        # triggers a parameter validation
+        if not isinstance(min_df, int) and min_df is not None:
+            raise ValueError(
+                "'min_df' parameter must be of type int"
+            )
+        # triggers a parameter validation
+        if min_df == 0:
+            raise ValueError(
+                "'min_df' parameter must be > 0"
+            )
+
+        # triggers a parameter validation
+        if not isinstance(max_df, int) and max_df is not None:
+            raise ValueError(
+                "'max_df' parameter must be of type int"
+            )
+
+        # triggers a parameter validation
+        if max_df == 0:
+            raise ValueError(
+                "'max_df' parameter must be > 0"
+            )
+
+        # triggers a parameter validation
+        if max_df and min_df and max_df <= min_df:
+            raise ValueError(
+                "'max_df' must be > 'min_df'"
+            )
 
         self.spacy_pipeline = spacy_pipeline
         self.pos_pattern = pos_pattern
         self.stop_words = stop_words
         self.lowercase = lowercase
         self.multiprocessing = multiprocessing
+        self.max_df = max_df
+        self.min_df = min_df
         self.binary = binary
         self.dtype = dtype
 
@@ -100,13 +139,36 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                                                    pos_pattern=self.pos_pattern,
                                                    lowercase=self.lowercase, multiprocessing=self.multiprocessing)
 
+        # remove keyphrases that have more than 8 words, as they are probably no real keyphrases
+        # additionally this prevents memory issues during transformation to a document-keyphrase matrix
+        self.keyphrases = [keyphrase for keyphrase in self.keyphrases if len(keyphrase.split()) <= 8]
+
+        # compute document frequencies of keyphrases
+        if self.max_df or self.min_df:
+            document_keyphrase_counts = CountVectorizer(vocabulary=self.keyphrases, ngram_range=(
+                min([len(keyphrase.split()) for keyphrase in self.keyphrases]),
+                max([len(keyphrase.split()) for keyphrase in self.keyphrases])),
+                                                        lowercase=self.lowercase, binary=self.binary,
+                                                        dtype=self.dtype).transform(
+                raw_documents=raw_documents).toarray()
+
+            document_frequencies = self._document_frequency(document_keyphrase_counts)
+
+        # remove keyphrases with document frequencies < min_df and document frequencies > max_df
+        if self.max_df:
+            self.keyphrases = [keyphrase for index, keyphrase in enumerate(self.keyphrases) if
+                               (document_frequencies[index] <= self.max_df)]
+        if self.min_df:
+            self.keyphrases = [keyphrase for index, keyphrase in enumerate(self.keyphrases) if
+                               (document_frequencies[index] >= self.min_df)]
+
         # set n-gram range to zero if no keyphrases could be extracted
         if self.keyphrases:
             self.max_n_gram_length = max([len(keyphrase.split()) for keyphrase in self.keyphrases])
             self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
         else:
             raise ValueError(
-                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' parameter or only contain stop words.")
+                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' parameter, only contain stop words, or you set the 'min_df'/'max_df' parameters too strict.")
 
         return self
 
@@ -127,20 +189,10 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             Document-keyphrase matrix.
         """
 
-        self.keyphrases = self._get_pos_keyphrases(document_list=raw_documents,
-                                                   stop_words=self.stop_words,
-                                                   spacy_pipeline=self.spacy_pipeline,
-                                                   pos_pattern=self.pos_pattern,
-                                                   lowercase=self.lowercase, multiprocessing=self.multiprocessing)
+        # fit
+        KeyphraseCountVectorizer.fit(self=self, raw_documents=raw_documents)
 
-        # set n-gram range to zero if no keyphrases could be extracted
-        if self.keyphrases:
-            self.max_n_gram_length = max([len(keyphrase.split()) for keyphrase in self.keyphrases])
-            self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
-        else:
-            raise ValueError(
-                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' parameter or only contain stop words.")
-
+        # transform
         return CountVectorizer(vocabulary=self.keyphrases, ngram_range=(self.min_n_gram_length, self.max_n_gram_length),
                                lowercase=self.lowercase, binary=self.binary, dtype=self.dtype).fit_transform(
             raw_documents=raw_documents)
