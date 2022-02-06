@@ -383,7 +383,7 @@ Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled 
 
 [Back to Table of Contents](#toc)
 
-Similar to the use with KeyBERT, the keyphrase vectorizers can be used to obtain grammatically correct keyphrases as
+Similar to the application with KeyBERT, the keyphrase vectorizers can be used to obtain grammatically correct keyphrases as
 descriptions for topics instead of simple n-grams. This allows us to make sure that we do not cut off important topic
 description keyphrases by defining our n-gram range too short. Moreover, we don't need to clean stopwords upfront, can
 get more precise topic models and avoid to get topic description keyphrases that are slightly off-key.
@@ -397,7 +397,7 @@ from sklearn.datasets import fetch_20newsgroups
 
 # load text documents
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-# only use a subset of the data set
+# only use subset of the data 
 docs = docs[:5000]
 
 # train topic model with KeyphraseCountVectorizer
@@ -449,7 +449,7 @@ keyphrase_topics, keyphrase_probs = keyphrase_topic_model.fit_transform(docs)
   ...
 ```
 
-The same topics looks a bit different when no keyphrase vectorizer is used:
+The same topics look a bit different when no keyphrase vectorizer is used:
 
 ```python
 from bertopic import BERTopic
@@ -457,7 +457,7 @@ from sklearn.datasets import fetch_20newsgroups
 
 # load text documents
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-# only use a subset of the data set
+# only use subset of the data 
 docs = docs[:5000]
 
 # train topic model without KeyphraseCountVectorizer
