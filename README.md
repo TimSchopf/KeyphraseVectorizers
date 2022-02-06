@@ -388,6 +388,8 @@ descriptions for topics instead of simple n-grams. This allows us to make sure t
 description keyphrases by defining our n-gram range too short. Moreover, we don't need to clean stopwords upfront, can
 get more precise topic models and avoid to get topic description keyphrases that are slightly off-key.
 
+#### Example:
+
 BERTopic can be installed via `pip install bertopic`.
 
 ```python
