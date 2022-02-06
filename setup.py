@@ -34,7 +34,8 @@ setuptools.setup(
         'numpy >= 1.18.5',
         'spacy >= 3.0.1',
         'nltk >= 3.6.1',
-        'scikit-learn >= 1.0'
+        'scikit-learn >= 1.0',
+        'scipy>=1.7.3'
     ],
     package_dir={"": "."},
     packages=setuptools.find_packages(where="."),
