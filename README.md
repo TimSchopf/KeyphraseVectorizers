@@ -237,7 +237,7 @@ vectorizer = KeyphraseTfidfVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
-{'binary': False, 'dtype': <class 'numpy.float64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'norm': 'l2', 'pos_pattern': '<J.*>*<N.*>+', 'smooth_idf': True, 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'sublinear_tf': False, 'use_idf': True, 'workers': 1}
+>>> {'binary': False, 'dtype': <class 'numpy.float64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'norm': 'l2', 'pos_pattern': '<J.*>*<N.*>+', 'smooth_idf': True, 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'sublinear_tf': False, 'use_idf': True, 'workers': 1}
 ```
 
 To calculate tf values instead, set `use_idf=False`.
