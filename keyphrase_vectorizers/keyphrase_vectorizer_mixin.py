@@ -10,6 +10,7 @@ import os
 from typing import List
 
 import numpy as np
+import psutil
 import scipy.sparse as sp
 import spacy
 from nltk import RegexpParser
@@ -180,7 +181,7 @@ class _KeyphraseVectorizerMixin():
             return splitted_document
 
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str,
-                            lowercase: bool = True, multiprocessing: bool = False) -> List[str]:
+                            lowercase: bool = True, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
         Parameters
@@ -202,9 +203,10 @@ class _KeyphraseVectorizerMixin():
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.
 
-        multiprocessing : bool, default=False
-            Whether to use multiprocessing for spaCy POS tagging.
-            If True, spaCy uses all cores to POS tag documents.
+        workers :int, default=1
+            How many workers to use for spaCy part-of-speech tagging.
+            If set to -1, use all available worker threads of the machine.
+            spaCy uses the specified number of cores to tag documents with part-of-speech.
             Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
@@ -244,6 +246,17 @@ class _KeyphraseVectorizerMixin():
                 "'pos_pattern' parameter needs to be a regex string. E.g. '<J.*>*<N.*>+'"
             )
 
+        # triggers a parameter validation
+        if not isinstance(workers, int):
+            raise ValueError(
+                "'workers' parameter must be of type int"
+            )
+
+        if (workers < -1) or (workers > psutil.cpu_count(logical=True)):
+            raise ValueError(
+                "'workers' parameter value must be between -1 and " + str(psutil.cpu_count(logical=True))
+            )
+
         stop_words_list = []
         if stop_words:
             stop_words_list = set(stopwords.words(stop_words))
@@ -274,11 +287,8 @@ class _KeyphraseVectorizerMixin():
         nlp.add_pipe('sentencizer')
 
         keyphrases_list = []
-        if multiprocessing:
-            num_workers = -1
+        if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        else:
-            num_workers = 1
 
         # split large documents in smaller chunks, so that spacy can process them without memory issues
         docs_list = []
@@ -297,7 +307,7 @@ class _KeyphraseVectorizerMixin():
         nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
         cp = RegexpParser('CHUNK: {(' + pos_pattern + ')}')
-        for tagged_doc in nlp.pipe(document_list, n_process=num_workers):
+        for tagged_doc in nlp.pipe(document_list, n_process=workers):
             tagged_pos_doc = []
             for sentence in tagged_doc.sents:
                 pos_tagged_sentence = []

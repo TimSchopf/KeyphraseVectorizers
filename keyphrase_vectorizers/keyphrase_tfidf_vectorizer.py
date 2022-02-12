@@ -10,6 +10,7 @@ import warnings
 from typing import List
 
 import numpy as np
+import psutil
 from sklearn.exceptions import NotFittedError
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.utils.validation import FLOAT_DTYPES
@@ -80,9 +81,10 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
     lowercase : bool, default=True
         Whether the returned keyphrases should be converted to lowercase.
 
-    multiprocessing : bool, default=False
-            Whether to use multiprocessing for spaCy part-of-speech tagging.
-            If True, spaCy uses all cores to tag documents with part-of-speech.
+    workers :int, default=1
+            How many workers to use for spaCy part-of-speech tagging.
+            If set to -1, use all available worker threads of the machine.
+            spaCy uses the specified number of cores to tag documents with part-of-speech.
             Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
@@ -121,17 +123,28 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: str = 'english',
-                 lowercase: bool = True, multiprocessing: bool = False, max_df: int = None, min_df: int = None,
+                 lowercase: bool = True, workers: int = 1, max_df: int = None, min_df: int = None,
                  binary: bool = False,
                  dtype: np.dtype = np.float64, norm: str = "l2",
                  use_idf: bool = True, smooth_idf: bool = True,
                  sublinear_tf: bool = False):
 
+        # triggers a parameter validation
+        if not isinstance(workers, int):
+            raise ValueError(
+                "'workers' parameter must be of type int"
+            )
+
+        if (workers < -1) or (workers > psutil.cpu_count(logical=True)):
+            raise ValueError(
+                "'workers' parameter value must be between -1 and " + str(psutil.cpu_count(logical=True))
+            )
+
         self.spacy_pipeline = spacy_pipeline
         self.pos_pattern = pos_pattern
         self.stop_words = stop_words
         self.lowercase = lowercase
-        self.multiprocessing = multiprocessing
+        self.workers = workers
         self.max_df = max_df
         self.min_df = min_df
         self.binary = binary
@@ -145,7 +158,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                                        sublinear_tf=self.sublinear_tf)
 
         super().__init__(spacy_pipeline=self.spacy_pipeline, pos_pattern=self.pos_pattern, stop_words=self.stop_words,
-                         lowercase=self.lowercase, multiprocessing=self.multiprocessing, max_df=self.max_df,
+                         lowercase=self.lowercase, workers=self.workers, max_df=self.max_df,
                          min_df=self.min_df, binary=self.binary,
                          dtype=self.dtype)
 
