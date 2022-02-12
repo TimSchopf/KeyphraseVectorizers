@@ -252,9 +252,10 @@ class _KeyphraseVectorizerMixin():
                 "'workers' parameter must be of type int"
             )
 
-        if (workers < -1) or (workers > psutil.cpu_count(logical=True)):
+        if (workers < -1) or (workers > psutil.cpu_count(logical=True)) or (workers == 0):
             raise ValueError(
-                "'workers' parameter value must be between -1 and " + str(psutil.cpu_count(logical=True))
+                "'workers' parameter value cannot be 0 and must be between -1 and " + str(
+                    psutil.cpu_count(logical=True))
             )
 
         stop_words_list = []
