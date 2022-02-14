@@ -1,6 +1,7 @@
 [![PyPI - Python](https://img.shields.io/badge/python-%3E%3D3.7-blue)](https://pypi.org/project/keyphrase-vectorizers/)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-green.svg)](https://github.com/TimSchopf/Keyphrase_Vectorizers/blob/master/LICENSE)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/keyphrase-vectorizers.svg)](https://pypi.org/project/keyphrase-vectorizers/)
+[![Build](https://img.shields.io/github/workflow/status/TimSchopf/KeyphraseVectorizers/Code%20tests/master)](https://pypi.org/project/keyphrase-vectorizers/)
 [![Documentation Status](https://readthedocs.org/projects/keyphrase-vectorizers/badge/?version=latest)](https://keyphrase-vectorizers.readthedocs.io/en/latest/?badge=latest)
 
 KeyphraseVectorizers
