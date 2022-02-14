@@ -15,14 +15,12 @@ with open(ver_path) as ver_file:
     base_packages = ver_file.readlines()
 
 base_packages = [base_package.strip() for base_package in base_packages]
-print(base_packages)
 
-ver_path = convert_path('tests/test_requirements.txt')
+ver_path = convert_path('tests/requirements.txt')
 with open(ver_path) as ver_file:
     test_packages = ver_file.readlines()
 
 test_packages = [test_package.strip() for test_package in test_packages]
-print(test_packages)
 
 setuptools.setup(
     name='keyphrase-vectorizers',

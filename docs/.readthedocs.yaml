@@ -18,7 +18,7 @@ formats: all
 python:
   version: 3.7
   install:
-    - requirements: docs/doc_requirements.txt
+    - requirements: docs/requirements.txt
     - requirements: requirements.txt
     - method: pip
   system_packages: true
