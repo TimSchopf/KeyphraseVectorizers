@@ -14,8 +14,6 @@ import numpy as np
 import psutil
 import scipy.sparse as sp
 import spacy
-from nltk import RegexpParser
-from nltk.corpus import stopwords
 
 
 class _KeyphraseVectorizerMixin():
@@ -191,7 +189,7 @@ class _KeyphraseVectorizerMixin():
             List of text documents from which to extract the keyphrases.
 
         stop_words : str
-            Language of stopwords to remove from the document, e.g.'english.
+            Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
 
@@ -262,7 +260,7 @@ class _KeyphraseVectorizerMixin():
         stop_words_list = []
         if stop_words:
             try:
-                stop_words_list = set(stopwords.words(stop_words))
+                stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
             except LookupError:
                 logger = logging.getLogger('KeyphraseVectorizer')
                 logger.setLevel(logging.WARNING)
@@ -272,9 +270,9 @@ class _KeyphraseVectorizerMixin():
                 logger.addHandler(sh)
                 logger.setLevel(logging.DEBUG)
                 logger.info(
-                    'It looks like you do not have downloaded the stopwords list yet. It is attempted to download the stopwords now.')
+                    'It looks like you do not have downloaded a list of stopwords yet. It is attempted to download the stopwords now.')
                 nltk.download('stopwords')
-                stop_words_list = set(stopwords.words(stop_words))
+                stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
 
         # add spaCy POS tags for documents
         spacy_exclude = ['parser', 'ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
@@ -321,7 +319,7 @@ class _KeyphraseVectorizerMixin():
         # (should only be done if parser and ner are not used due to memory issues)
         nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
-        cp = RegexpParser('CHUNK: {(' + pos_pattern + ')}')
+        cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
         for tagged_doc in nlp.pipe(document_list, n_process=workers):
             tagged_pos_doc = []
             for sentence in tagged_doc.sents:

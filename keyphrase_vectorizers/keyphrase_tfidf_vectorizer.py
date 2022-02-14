@@ -74,7 +74,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         Standard is to only select keyphrases that have 0 or more adjectives, followed by 1 or more nouns.
 
     stop_words : str, default='english'
-            Language of stopwords to remove from the document, e.g.'english.
+            Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
 
