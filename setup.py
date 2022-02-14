@@ -12,15 +12,11 @@ with open(ver_path) as ver_file:
 
 ver_path = convert_path('requirements.txt')
 with open(ver_path) as ver_file:
-    base_packages = ver_file.readlines()
-
-base_packages = [base_package.strip() for base_package in base_packages]
+    base_packages = ver_file.read().splitlines()
 
 ver_path = convert_path('tests/requirements.txt')
 with open(ver_path) as ver_file:
-    test_packages = ver_file.readlines()
-
-test_packages = [test_package.strip() for test_package in test_packages]
+    test_packages = ver_file.read().splitlines()
 
 setuptools.setup(
     name='keyphrase-vectorizers',
@@ -49,4 +45,5 @@ setuptools.setup(
     package_dir={"": "."},
     packages=setuptools.find_packages(where="."),
     python_requires='>=3.7',
+    data_files=[('requirements', ['requirements.txt', 'tests/requirements.txt', 'docs/requirements.txt'])],
 )
