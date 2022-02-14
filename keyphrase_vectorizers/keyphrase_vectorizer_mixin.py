@@ -9,6 +9,7 @@ import logging
 import os
 from typing import List
 
+import nltk
 import numpy as np
 import psutil
 import scipy.sparse as sp
@@ -260,7 +261,20 @@ class _KeyphraseVectorizerMixin():
 
         stop_words_list = []
         if stop_words:
-            stop_words_list = set(stopwords.words(stop_words))
+            try:
+                stop_words_list = set(stopwords.words(stop_words))
+            except LookupError:
+                logger = logging.getLogger('KeyphraseVectorizer')
+                logger.setLevel(logging.WARNING)
+                sh = logging.StreamHandler()
+                sh.setFormatter(logging.Formatter(
+                    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                logger.addHandler(sh)
+                logger.setLevel(logging.DEBUG)
+                logger.info(
+                    'It looks like you do not have downloaded the stopwords list yet. It is attempted to download the stopwords now.')
+                nltk.download('stopwords')
+                stop_words_list = set(stopwords.words(stop_words))
 
         # add spaCy POS tags for documents
         spacy_exclude = ['parser', 'ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
