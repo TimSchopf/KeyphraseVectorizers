@@ -10,6 +10,20 @@ ver_path = convert_path('keyphrase_vectorizers/_version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
+ver_path = convert_path('requirements.txt')
+with open(ver_path) as ver_file:
+    base_packages = ver_file.readlines()
+
+base_packages = [base_package.strip() for base_package in base_packages]
+print(base_packages)
+
+ver_path = convert_path('tests/test_requirements.txt')
+with open(ver_path) as ver_file:
+    test_packages = ver_file.readlines()
+
+test_packages = [test_package.strip() for test_package in test_packages]
+print(test_packages)
+
 setuptools.setup(
     name='keyphrase-vectorizers',
     version=main_ns['__version__'],
@@ -30,14 +44,10 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        'numpy >= 1.18.5',
-        'spacy >= 3.0.1',
-        'nltk >= 3.6.1',
-        'scikit-learn >= 1.0',
-        'scipy>=1.7.3',
-        'psutil>=5.8.0'
-    ],
+    install_requires=base_packages,
+    extras_require={
+        "test": test_packages
+    },
     package_dir={"": "."},
     packages=setuptools.find_packages(where="."),
     python_requires='>=3.7',
