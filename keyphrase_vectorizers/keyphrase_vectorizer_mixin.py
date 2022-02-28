@@ -179,7 +179,7 @@ class _KeyphraseVectorizerMixin():
                                                                max_text_length=max_text_length)
             return splitted_document
 
-    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: Any = None,
+    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: any = None,
                             lowercase: bool = True, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.

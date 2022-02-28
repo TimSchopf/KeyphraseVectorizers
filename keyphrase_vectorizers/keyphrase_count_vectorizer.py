@@ -76,7 +76,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         Type of the matrix returned by fit_transform() or transform().
     """
 
-    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+', pos_tagger: Any = None,
+    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+', pos_tagger: any = None,
                  stop_words: str = 'english', lowercase: bool = True, workers: int = 1, max_df: int = None,
                  min_df: int = None,
                  binary: bool = False, dtype: np.dtype = np.int64):
