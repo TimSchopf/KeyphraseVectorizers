@@ -179,7 +179,7 @@ class _KeyphraseVectorizerMixin():
                                                                max_text_length=max_text_length)
             return splitted_document
 
-    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str,
+    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: any = None,
                             lowercase: bool = True, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
@@ -276,7 +276,7 @@ class _KeyphraseVectorizerMixin():
 
         # add spaCy POS tags for documents
         spacy_exclude = ['parser', 'ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
-                         'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer']
+                         'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'tok2vec', 'transformer']
         try:
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
@@ -299,6 +299,10 @@ class _KeyphraseVectorizerMixin():
         # add rule based sentence boundary detection
         nlp.add_pipe('sentencizer')
 
+        if pos_tagger != None:
+          pos_tagger_component = Language.component("pos_tagger", func=pos_tagger)
+          nlp.add_pipe("pos_tagger", name="pos_tagger", first=True)
+
         keyphrases_list = []
         if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -309,10 +313,10 @@ class _KeyphraseVectorizerMixin():
         max_doc_length = 1000000
         for document in document_list:
             if len(document) > max_doc_length:
-                docs_list.append(self._split_long_document(text=document, max_text_length=max_doc_length))
+                docs_list.extend(self._split_long_document(text=document, max_text_length=max_doc_length))
             else:
-                docs_list.append([document])
-        document_list = [text for split_text in docs_list for text in split_text]
+                docs_list.append(document)
+        document_list = docs_list
         del docs_list
 
         # increase max length of documents that spaCy can parse
