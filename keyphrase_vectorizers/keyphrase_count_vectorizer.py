@@ -143,6 +143,9 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.binary = binary
         self.dtype = dtype
 
+        super().__init__()
+
+
     def fit(self, raw_documents: List[str]) -> object:
         """
         Learn the keyphrases that match the defined part-of-speech pattern from the list of raw documents.

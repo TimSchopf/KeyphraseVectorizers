@@ -23,6 +23,9 @@ class _KeyphraseVectorizerMixin():
     Provides common code for text vectorizers.
     """
 
+    def __init__(self):
+        self.lemmatized_docs = []
+
     def _document_frequency(self, document_keyphrase_count_matrix: List[List[int]]) -> np.array:
         """
         Count the number of non-zero values for each feature in sparse a matrix.
@@ -179,6 +182,9 @@ class _KeyphraseVectorizerMixin():
                                                                max_text_length=max_text_length)
             return splitted_document
 
+    def get_lemmatized_docs(self):
+        return self.lemmatized_documents
+
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: any = None,
                             lowercase: bool = True, use_lemmatizer: bool = False, workers: int = 1) -> List[str]:
         """
@@ -327,8 +333,6 @@ class _KeyphraseVectorizerMixin():
                 docs_list.append(document)
         document_list = docs_list
         del docs_list
-
-        self.lemmatized_documents = []
 
         # increase max length of documents that spaCy can parse
         # (should only be done if parser and ner are not used due to memory issues)
