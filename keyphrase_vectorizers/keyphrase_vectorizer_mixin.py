@@ -275,7 +275,7 @@ class _KeyphraseVectorizerMixin():
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
 
         # add spaCy POS tags for documents
-        spacy_exclude = ['parser', 'ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
+        spacy_exclude = ['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
                          'lemmatizer', 'senter', 'sentencizer', 'tok2vec']
         try:
             nlp = spacy.load(spacy_pipeline,
