@@ -296,9 +296,6 @@ class _KeyphraseVectorizerMixin():
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
 
-        # add rule based sentence boundary detection
-        nlp.add_pipe('sentencizer')
-
         if pos_tagger != None:
           pos_tagger_component = Language.component("pos_tagger", func=pos_tagger)
           nlp.add_pipe("pos_tagger", name="pos_tagger", first=True)
@@ -326,43 +323,23 @@ class _KeyphraseVectorizerMixin():
         cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
         for tagged_doc in nlp.pipe(document_list, n_process=workers):
             tagged_pos_doc = []
-            for sentence in tagged_doc.sents:
-                pos_tagged_sentence = []
-                for word in sentence:
-                    pos_tagged_sentence.append((word.text, word.tag_))
-                tagged_pos_doc.append(pos_tagged_sentence)
+            pos_tuples = [(d.text, d.pos_) for d in tagged_doc]
 
-            # extract keyphrases that match the NLTK RegexpParser filter
             keyphrases = []
-            prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
-            suffix_list = [' ' + stop_word for stop_word in stop_words_list]
-            for sentence in tagged_pos_doc:
-                tree = cp.parse(sentence)
-                for subtree in tree.subtrees():
-                    if subtree.label() == 'CHUNK':
-                        # join candidate keyphrase from single words
-                        keyphrase = ' '.join([i[0] for i in subtree.leaves()])
+            output = chunker.parse(pos_tuples)
+            sequences = []
+            for subtree in output.subtrees(filter=lambda t: t.label() == 'CHUNK'):
+                keyphrase = ' '.join([i[0] for i in subtree.leaves()])
+                
+                # convert keyphrase to lowercase
+                if lowercase:
+                    keyphrase = keyphrase.lower()
 
-                        # convert keyphrase to lowercase
-                        if lowercase:
-                            keyphrase = keyphrase.lower()
-
-                        # remove stopword suffixes
-                        keyphrase = self._remove_suffixes(keyphrase, suffix_list)
-
-                        # remove stopword prefixes
-                        keyphrase = self._remove_prefixes(keyphrase, prefix_list)
-
-                        # remove whitespace from the beginning and end of keyphrases
-                        keyphrase = keyphrase.strip()
-
-                        # do not include single keywords that are actually stopwords
-                        if keyphrase.lower() not in stop_words_list:
-                            keyphrases.append(keyphrase)
-
-            # remove potential empty keyphrases
-            keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
-
+                keyphrase = keyphrase.strip()
+                
+                if keyphrase not in stop_words_list:
+                    sequences.append(keyphrase)
+            keyphrases = list(set(sequences))
             keyphrases_list.append(list(set(keyphrases)))
 
         return list(set([keyphrase for sub_keyphrase_list in keyphrases_list for keyphrase in sub_keyphrase_list]))
