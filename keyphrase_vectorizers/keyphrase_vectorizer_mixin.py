@@ -24,7 +24,7 @@ class _KeyphraseVectorizerMixin():
     """
 
     def __init__(self):
-        self.lemmatized_docs = []
+        self.lemmatized_documents = []
 
     def _document_frequency(self, document_keyphrase_count_matrix: List[List[int]]) -> np.array:
         """
@@ -182,7 +182,7 @@ class _KeyphraseVectorizerMixin():
                                                                max_text_length=max_text_length)
             return splitted_document
 
-    def get_lemmatized_docs(self):
+    def get_lemmatized_documents(self):
         return self.lemmatized_documents
 
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: any = None,
