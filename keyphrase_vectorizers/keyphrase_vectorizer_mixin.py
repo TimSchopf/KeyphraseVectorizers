@@ -180,7 +180,7 @@ class _KeyphraseVectorizerMixin():
             return splitted_document
 
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: any = None,
-                            lowercase: bool = True, workers: int = 1) -> List[str]:
+                            lowercase: bool = True, use_lemmatizer: bool = False, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
         Parameters
@@ -201,6 +201,9 @@ class _KeyphraseVectorizerMixin():
 
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.
+
+        use_lemmatizer : bool, default=False
+            Whether to lemmatize documents before extracting keyphrases. Keyphrases will be lemmatized.
 
         workers :int, default=1
             How many workers to use for spaCy part-of-speech tagging.
@@ -246,6 +249,12 @@ class _KeyphraseVectorizerMixin():
             )
 
         # triggers a parameter validation
+        if not isinstance(use_lemmatizer, bool):
+            raise ValueError(
+                "'use_lemmatizer' parameter must be of type bool"
+            )
+
+        # triggers a parameter validation
         if not isinstance(workers, int):
             raise ValueError(
                 "'workers' parameter must be of type int"
@@ -276,7 +285,7 @@ class _KeyphraseVectorizerMixin():
 
         # add spaCy POS tags for documents
         spacy_exclude = ['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
-                         'lemmatizer', 'senter', 'sentencizer', 'tok2vec']
+                         'senter', 'sentencizer', 'tok2vec']
         try:
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
@@ -300,6 +309,9 @@ class _KeyphraseVectorizerMixin():
           pos_tagger_component = Language.component("pos_tagger", func=pos_tagger)
           nlp.add_pipe("pos_tagger", name="pos_tagger", first=True)
 
+        if use_lemmatizer == False:
+            spacy_exclude.append("lemmatizer")
+
         keyphrases_list = []
         if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -316,13 +328,14 @@ class _KeyphraseVectorizerMixin():
         document_list = docs_list
         del docs_list
 
+        self.lemmatized_documents = []
+
         # increase max length of documents that spaCy can parse
         # (should only be done if parser and ner are not used due to memory issues)
         nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
         cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
-        for tagged_doc in nlp.pipe(document_list, n_process=workers):
-            tagged_pos_doc = []
+        for tagged_doc in nlp.pipe(document_list, n_process=workers):            
             pos_tuples = [(d.text, d.pos_) for d in tagged_doc]
 
             keyphrases = []
@@ -341,5 +354,8 @@ class _KeyphraseVectorizerMixin():
                     sequences.append(keyphrase)
             keyphrases = list(set(sequences))
             keyphrases_list.append(list(set(keyphrases)))
+
+            if use_lemmatizer:
+                self.lemmatized_documents.append(' '.join([d.lemma_ for d in tagged_doc]))
 
         return list(set([keyphrase for sub_keyphrase_list in keyphrases_list for keyphrase in sub_keyphrase_list]))
