@@ -136,7 +136,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.pos_tagger = pos_tagger
         self.stop_words = stop_words
         self.lowercase = lowercase
-        self.use_lemmatizer = lemmatizer
+        self.use_lemmatizer = use_lemmatizer
         self.workers = workers
         self.max_df = max_df
         self.min_df = min_df
