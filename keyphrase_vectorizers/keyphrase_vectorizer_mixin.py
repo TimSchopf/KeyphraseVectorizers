@@ -343,7 +343,7 @@ class _KeyphraseVectorizerMixin():
             pos_tuples = [(d.text, d.pos_) for d in tagged_doc]
 
             keyphrases = []
-            output = chunker.parse(pos_tuples)
+            output = cp.parse(pos_tuples)
             sequences = []
             for subtree in output.subtrees(filter=lambda t: t.label() == 'CHUNK'):
                 keyphrase = ' '.join([i[0] for i in subtree.leaves()])
