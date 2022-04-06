@@ -339,10 +339,13 @@ class _KeyphraseVectorizerMixin():
         nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
         cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
-        for tagged_doc in nlp.pipe(document_list, n_process=workers):            
-            pos_tuples = [(d.text, d.pos_) for d in tagged_doc]
+        for tagged_doc in nlp.pipe(document_list, n_process=workers):  
+            if use_lemmatizer:
+                self.lemmatized_documents.append(' '.join([d.lemma_ for d in tagged_doc]))
+                pos_tuples = [(d.lemma_, d.pos_) for d in tagged_doc]
+            else:
+                pos_tuples = [(d.text, d.pos_) for d in tagged_doc]
 
-            keyphrases = []
             output = cp.parse(pos_tuples)
             sequences = []
             for subtree in output.subtrees(filter=lambda t: t.label() == 'CHUNK'):
@@ -356,10 +359,6 @@ class _KeyphraseVectorizerMixin():
                 
                 if keyphrase not in stop_words_list:
                     sequences.append(keyphrase)
-            keyphrases = list(set(sequences))
-            keyphrases_list.append(list(set(keyphrases)))
-
-            if use_lemmatizer:
-                self.lemmatized_documents.append(' '.join([d.lemma_ for d in tagged_doc]))
+            keyphrases_list.append(list(set(sequences)))
 
         return list(set([keyphrase for sub_keyphrase_list in keyphrases_list for keyphrase in sub_keyphrase_list]))
