@@ -19,6 +19,8 @@ and
 classes. Instead of using n-gram tokens of a pre-defined range, these classes extract keyphrases from text documents
 using part-of-speech tags to compute document-keyphrase matrices.
 
+Corresponding medium post can be found [here](https://towardsdatascience.com/enhancing-keybert-keyword-extraction-results-with-keyphrasevectorizers-3796fa93f4db "Keyphrase Extraction with BERT Transformers and Noun Phrases").
+
 Benefits
 --------
 
