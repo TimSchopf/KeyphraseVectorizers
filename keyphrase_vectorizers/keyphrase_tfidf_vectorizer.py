@@ -73,7 +73,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
         Standard is to only select keyphrases that have 0 or more adjectives, followed by 1 or more nouns.
 
-    stop_words : str, default='english'
+    stop_words : str, default=None
             Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
@@ -122,7 +122,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
     """
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
-                 stop_words: str = 'english',
+                 stop_words: str = None,
                  lowercase: bool = True, workers: int = 1, max_df: int = None, min_df: int = None,
                  binary: bool = False,
                  dtype: np.dtype = np.float64, norm: str = "l2",

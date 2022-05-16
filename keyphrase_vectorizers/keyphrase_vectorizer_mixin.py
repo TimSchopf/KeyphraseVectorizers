@@ -228,9 +228,9 @@ class _KeyphraseVectorizerMixin():
             )
 
         # triggers a parameter validation
-        if not isinstance(stop_words, str):
+        if not isinstance(stop_words, str) and (stop_words is not None):
             raise ValueError(
-                "'stop_words' parameter needs to be a string. E.g. 'english'"
+                "'stop_words' parameter needs to be a string, e.g. 'english' or 'None'"
             )
 
         # triggers a parameter validation
