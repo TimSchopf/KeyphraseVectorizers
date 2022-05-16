@@ -137,17 +137,16 @@ vectorizer.fit(docs)
 keyphrases = vectorizer.get_feature_names_out()
 
 print(keyphrases)
->>> ['output' 'training data' 'task' 'way' 'input object' 'documents'
- 'unseen instances' 'vector' 'interest' 'learning algorithm'
- 'unseen situations' 'training examples' 'machine' 'given document'
- 'document' 'document relevance' 'output pairs' 'document content'
- 'class labels' 'new examples' 'pair' 'main topics' 'phrases' 'overlap'
- 'algorithm' 'various applications' 'information retrieval' 'users' 'list'
- 'example input' 'supervised learning' 'optimal scenario'
- 'precise summary' 'keywords' 'input' 'supervised learning algorithm'
- 'example' 'supervisory signal' 'indication' 'set'
- 'information retrieval environment' 'output value' 'inductive bias'
- 'groups' 'function']
+>>> ['users' 'main topics' 'learning algorithm' 'overlap' 'documents' 'output'
+ 'keywords' 'precise summary' 'new examples' 'training data' 'input'
+ 'document content' 'training examples' 'unseen instances'
+ 'optimal scenario' 'document' 'task' 'supervised learning algorithm'
+ 'example' 'interest' 'function' 'example input' 'various applications'
+ 'unseen situations' 'phrases' 'indication' 'inductive bias'
+ 'supervisory signal' 'document relevance' 'information retrieval' 'set'
+ 'input object' 'groups' 'output value' 'list' 'learning' 'output pairs'
+ 'pair' 'class labels' 'supervised learning' 'machine'
+ 'information retrieval environment' 'algorithm' 'vector' 'way']
 ```
 
 ```python
@@ -158,10 +157,10 @@ print(keyphrases)
 document_keyphrase_matrix = vectorizer.transform(docs).toarray()
 
 print(document_keyphrase_matrix)
->>> [[3 3 1 1 1 0 1 1 0 2 1 1 1 0 0 0 1 0 1 1 1 0 0 0 3 0 0 0 0 1 3 1 0 0 3 1
-  2 1 0 1 0 1 1 0 3]
- [0 0 0 0 0 1 0 0 1 0 0 0 0 1 5 1 0 1 0 0 0 2 1 1 0 1 2 1 1 0 0 0 1 5 0 0
-  0 0 1 0 1 0 0 1 0]]
+>>> [[0 0 2 0 0 3 0 0 1 3 3 0 1 1 1 0 1 1 2 0 3 1 0 1 0 0 1 1 0 0 1 1 0 1 0 6
+  1 1 1 3 1 0 3 1 1]
+ [1 2 0 1 1 0 5 1 0 0 0 1 0 0 0 5 0 0 0 1 0 0 1 0 1 1 0 0 1 2 0 0 1 0 1 0
+  0 0 0 0 0 1 0 0 0]]
 ```
 
 ```python
@@ -170,10 +169,10 @@ print(document_keyphrase_matrix)
 document_keyphrase_matrix = vectorizer.fit_transform(docs).toarray()
 
 print(document_keyphrase_matrix)
->>> [[3 3 1 1 1 0 1 1 0 2 1 1 1 0 0 0 1 0 1 1 1 0 0 0 3 0 0 0 0 1 3 1 0 0 3 1
-  2 1 0 1 0 1 1 0 3]
- [0 0 0 0 0 1 0 0 1 0 0 0 0 1 5 1 0 1 0 0 0 2 1 1 0 1 2 1 1 0 0 0 1 5 0 0
-  0 0 1 0 1 0 0 1 0]]
+>>> [[0 0 2 0 0 3 0 0 1 3 3 0 1 1 1 0 1 1 2 0 3 1 0 1 0 0 1 1 0 0 1 1 0 1 0 6
+  1 1 1 3 1 0 3 1 1]
+ [1 2 0 1 1 0 5 1 0 0 0 1 0 0 0 5 0 0 0 1 0 0 1 0 1 1 0 0 1 2 0 0 1 0 1 0
+  0 0 0 0 0 1 0 0 0]]
 ```
 
 <a name="#other-languages"/></a>
@@ -250,22 +249,22 @@ To calculate tf values instead, set `use_idf=False`.
 document_keyphrase_matrix = vectorizer.fit_transform(docs).toarray()
 
 print(document_keyphrase_matrix)
->>> [[0.11111111 0.22222222 0.11111111 0.         0.         0.
-  0.11111111 0.         0.11111111 0.11111111 0.33333333 0.
-  0.         0.         0.11111111 0.         0.         0.11111111
-  0.         0.33333333 0.         0.22222222 0.         0.11111111
-  0.11111111 0.11111111 0.11111111 0.11111111 0.33333333 0.11111111
-  0.11111111 0.33333333 0.11111111 0.         0.33333333 0.
-  0.         0.         0.11111111 0.         0.11111111 0.11111111
-  0.         0.33333333 0.11111111]
- [0.         0.         0.         0.11785113 0.11785113 0.11785113
-  0.         0.11785113 0.         0.         0.         0.11785113
-  0.11785113 0.11785113 0.         0.11785113 0.23570226 0.
-  0.23570226 0.         0.58925565 0.         0.11785113 0.
-  0.         0.         0.         0.         0.         0.
-  0.         0.         0.         0.58925565 0.         0.11785113
-  0.11785113 0.11785113 0.         0.11785113 0.         0.
-  0.11785113 0.         0.        ]]
+>>> [[0.         0.         0.09245003 0.09245003 0.09245003 0.09245003
+  0.2773501  0.09245003 0.2773501  0.2773501  0.09245003 0.
+  0.         0.09245003 0.         0.2773501  0.09245003 0.09245003
+  0.         0.09245003 0.09245003 0.09245003 0.09245003 0.09245003
+  0.5547002  0.         0.         0.09245003 0.09245003 0.
+  0.2773501  0.18490007 0.09245003 0.         0.2773501  0.
+  0.         0.09245003 0.         0.09245003 0.         0.
+  0.         0.18490007 0.        ]
+ [0.11867817 0.11867817 0.         0.         0.         0.
+  0.         0.         0.         0.         0.         0.11867817
+  0.11867817 0.         0.11867817 0.         0.         0.
+  0.11867817 0.         0.         0.         0.         0.
+  0.         0.11867817 0.23735633 0.         0.         0.11867817
+  0.         0.         0.         0.23735633 0.         0.11867817
+  0.11867817 0.         0.59339083 0.         0.11867817 0.11867817
+  0.11867817 0.         0.59339083]]
 ```
 
 ```python
@@ -273,17 +272,16 @@ print(document_keyphrase_matrix)
 keyphrases = vectorizer.get_feature_names_out()
 
 print(keyphrases)
->>> ['optimal scenario' 'example' 'input object' 'groups' 'list'
- 'precise summary' 'inductive bias' 'phrases' 'training examples'
- 'output value' 'function' 'given document' 'documents'
- 'information retrieval environment' 'new examples' 'interest'
- 'main topics' 'unseen situations' 'information retrieval' 'input'
- 'keywords' 'learning algorithm' 'indication' 'set' 'example input'
- 'vector' 'machine' 'supervised learning algorithm' 'algorithm' 'pair'
- 'task' 'training data' 'way' 'document' 'supervised learning' 'users'
- 'document relevance' 'document content' 'supervisory signal' 'overlap'
- 'class labels' 'unseen instances' 'various applications' 'output'
- 'output pairs']
+>>> ['various applications' 'list' 'task' 'supervisory signal'
+ 'inductive bias' 'supervised learning algorithm' 'supervised learning'
+ 'example input' 'input' 'algorithm' 'set' 'precise summary' 'documents'
+ 'input object' 'interest' 'function' 'class labels' 'machine'
+ 'document content' 'output pairs' 'new examples' 'unseen situations'
+ 'vector' 'output value' 'learning' 'document relevance' 'main topics'
+ 'pair' 'training examples' 'information retrieval environment'
+ 'training data' 'example' 'optimal scenario' 'information retrieval'
+ 'output' 'groups' 'indication' 'unseen instances' 'keywords' 'way'
+ 'phrases' 'overlap' 'users' 'learning algorithm' 'document']
 ```
 
 <a name="#keyphrase-extraction-with-keybert"/></a>
@@ -363,20 +361,21 @@ n-gram range. We only have to pass a keyphrase vectorizer as parameter to KeyBER
 
 ```python
 >>> kw_model.extract_keywords(docs=docs, vectorizer=KeyphraseCountVectorizer())
-[[('training examples', 0.4668),
-  ('training data', 0.5271),
-  ('learning algorithm', 0.5632),
-  ('supervised learning', 0.6779),
-  ('supervised learning algorithm', 0.6992)],
- [('given document', 0.4143),
-  ('information retrieval environment', 0.5166),
-  ('information retrieval', 0.5792),
-  ('keywords', 0.6046),
+[[('learning', 0.4813), 
+  ('training data', 0.5271), 
+  ('learning algorithm', 0.5632), 
+  ('supervised learning', 0.6779), 
+  ('supervised learning algorithm', 0.6992)], 
+ [('document content', 0.3988), 
+  ('information retrieval environment', 0.5166), 
+  ('information retrieval', 0.5792), 
+  ('keywords', 0.6046), 
   ('document relevance', 0.633)]]
+
 ```
 
 This allows us to make sure that we do not cut off important words caused by defining our n-gram range too short. For
-example, we would not have found the keyphrase "supervised learning algorithm" with keyphrase_ngram_range=(1,2).
+example, we would not have found the keyphrase "supervised learning algorithm" with `keyphrase_ngram_range=(1,2)`.
 Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled training", "signal supervised" or
 "keywords quickly".
 
