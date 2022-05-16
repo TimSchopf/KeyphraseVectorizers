@@ -119,12 +119,7 @@ vectorizer = KeyphraseCountVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->> > {'binary': False, 'dtype': <
-
-
-class 'numpy.int64'>, 'lowercase': True, 'max_df': None
-
-, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_pipeline': 'en_core_web_sm', 'stop_words': None, 'workers': 1}
+>> > {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_pipeline': 'en_core_web_sm', 'stop_words': None, 'workers': 1}
 ```
 
 By default, the vectorizer is initialized for the English language. That means, an English `spacy_pipeline` is
