@@ -379,6 +379,8 @@ example, we would not have found the keyphrase "supervised learning algorithm" w
 Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled training", "signal supervised" or
 "keywords quickly".
 
+For more tips on how to use the KeyphraseVectorizers together with KeyBERT, visit [this guide](https://maartengr.github.io/KeyBERT/guides/countvectorizer.html#keyphrasevectorizers "KeyBERT rCountVectorizer Guide").
+
 <a name="#topic-modeling-with-bertopic-and-keyphrasevectorizers"/></a>
 
 ### Topic modeling with [BERTopic](https://github.com/MaartenGr/BERTopic "BERTopic repository") and KeyphraseVectorizers
