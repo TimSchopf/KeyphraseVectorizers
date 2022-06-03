@@ -275,8 +275,9 @@ class _KeyphraseVectorizerMixin():
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
 
         # add spaCy POS tags for documents
-        spacy_exclude = ['parser', 'ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
-                         'lemmatizer', 'morphologizer', 'senter', 'sentencizer', 'transformer']
+
+        # ToDo: add parameter to be able to exclude custom pipeline components for faster processing
+        spacy_exclude = []
         try:
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
@@ -295,9 +296,6 @@ class _KeyphraseVectorizerMixin():
             spacy.cli.download(spacy_pipeline)
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
-
-        # add rule based sentence boundary detection
-        nlp.add_pipe('sentencizer')
 
         keyphrases_list = []
         if workers != 1:

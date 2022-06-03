@@ -119,7 +119,7 @@ vectorizer = KeyphraseCountVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->> > {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_pipeline': 'en_core_web_sm', 'stop_words': None, 'workers': 1}
+>>> {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_pipeline': 'en_core_web_sm', 'stop_words': None, 'workers': 1}
 ```
 
 By default, the vectorizer is initialized for the English language. That means, an English `spacy_pipeline` is
@@ -361,23 +361,24 @@ n-gram range. We only have to pass a keyphrase vectorizer as parameter to KeyBER
 
 ```python
 >>> kw_model.extract_keywords(docs=docs, vectorizer=KeyphraseCountVectorizer())
-[[('learning', 0.4813), 
+[[('training examples', 0.4668), 
   ('training data', 0.5271), 
   ('learning algorithm', 0.5632), 
   ('supervised learning', 0.6779), 
   ('supervised learning algorithm', 0.6992)], 
- [('document content', 0.3988), 
+ [('given document', 0.4143), 
   ('information retrieval environment', 0.5166), 
   ('information retrieval', 0.5792), 
   ('keywords', 0.6046), 
   ('document relevance', 0.633)]]
-
 ```
 
 This allows us to make sure that we do not cut off important words caused by defining our n-gram range too short. For
 example, we would not have found the keyphrase "supervised learning algorithm" with `keyphrase_ngram_range=(1,2)`.
 Furthermore, we avoid to get keyphrases that are slightly off-key like "labeled training", "signal supervised" or
 "keywords quickly".
+
+For more tips on how to use the KeyphraseVectorizers together with KeyBERT, visit [this guide](https://maartengr.github.io/KeyBERT/guides/countvectorizer.html#keyphrasevectorizers "KeyBERT rCountVectorizer Guide").
 
 <a name="#topic-modeling-with-bertopic-and-keyphrasevectorizers"/></a>
 

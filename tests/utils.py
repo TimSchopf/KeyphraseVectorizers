@@ -37,15 +37,17 @@ def get_german_test_docs():
 
 
 def get_english_test_keyphrases():
-    sorted_english_test_keyphrases = ['algorithm', 'class labels', 'document', 'document content', 'document relevance',
-                                      'documents', 'example', 'example input', 'function', 'groups', 'indication',
-                                      'inductive bias', 'information retrieval', 'information retrieval environment',
-                                      'input', 'input object', 'interest', 'keywords', 'learning', 'learning algorithm',
-                                      'list', 'machine', 'main topics', 'new examples', 'optimal scenario', 'output',
-                                      'output pairs', 'output value', 'overlap', 'pair', 'phrases', 'precise summary',
-                                      'set', 'supervised learning', 'supervisory signal', 'task', 'training data',
-                                      'training examples', 'unseen instances', 'unseen situations', 'users',
-                                      'various applications', 'vector', 'way']
+    sorted_english_test_keyphrases = ['a', 'algorithm', 'class labels', 'document', 'document content',
+                                      'document relevance', 'documents', 'example', 'example input', 'function',
+                                      'given document', 'groups', 'indication', 'inductive bias',
+                                      'information retrieval', 'information retrieval environment', 'input',
+                                      'input object', 'interest', 'keywords', 'learning algorithm', 'list', 'machine',
+                                      'main topics', 'new examples', 'optimal scenario', 'output', 'output pairs',
+                                      'output value', 'overlap', 'pair', 'phrases', 'precise summary', 'set',
+                                      'supervised learning', 'supervised learning algorithm', 'supervisory signal',
+                                      'task', 'training data', 'training examples', 'unseen instances',
+                                      'unseen situations', 'users', 'various applications', 'vector', 'way']
+
     return sorted_english_test_keyphrases
 
 
@@ -66,33 +68,33 @@ def get_german_test_keyphrases():
 
 def get_sorted_english_count_matrix():
     sorted_english_count_matrix = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2,
-         3, 3, 3, 3, 3, 3, 6],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-         1, 1, 1, 2, 2, 5, 5]]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 2, 2, 3, 3, 3, 3, 3, 3],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 2, 2, 5, 5]]
 
     return sorted_english_count_matrix
 
 
 def get_sorted_english_tfidf_matrix():
     sorted_english_tfidf_matrix = [
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0928476691,
-         0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691,
-         0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691,
-         0.0928476691, 0.1856953382, 0.1856953382, 0.2785430073, 0.2785430073, 0.2785430073, 0.2785430073, 0.2785430073,
-         0.2785430073, 0.5570860145],
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1111111111,
+         0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111,
+         0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111, 0.1111111111,
+         0.1111111111, 0.1111111111, 0.2222222222, 0.2222222222, 0.3333333333, 0.3333333333, 0.3333333333, 0.3333333333,
+         0.3333333333, 0.3333333333],
         [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-         0.0, 0.0, 0.0, 0.0, 0.0, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658,
-         0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.2373563316,
-         0.2373563316, 0.5933908291, 0.5933908291]]
+         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302,
+         0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302, 0.1178511302,
+         0.1178511302, 0.2357022604, 0.2357022604, 0.589255651, 0.589255651]]
 
     return sorted_english_tfidf_matrix
 
 
 def get_english_keybert_keyphrases():
-    english_keybert_keyphrases = [
-        ['training examples', 'learning', 'training data', 'learning algorithm', 'supervised learning'],
-        ['document content', 'information retrieval environment', 'information retrieval', 'keywords',
-         'document relevance']]
+    english_keybert_keyphrases = [['training examples', 'training data', 'learning algorithm', 'supervised learning',
+                                   'supervised learning algorithm'],
+                                  ['given document', 'information retrieval environment', 'information retrieval',
+                                   'keywords', 'document relevance']]
 
     return english_keybert_keyphrases
