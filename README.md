@@ -361,12 +361,12 @@ n-gram range. We only have to pass a keyphrase vectorizer as parameter to KeyBER
 
 ```python
 >>> kw_model.extract_keywords(docs=docs, vectorizer=KeyphraseCountVectorizer())
-[[('training examples', 0.4668), 
+[[('learning', 0.4813), 
   ('training data', 0.5271), 
   ('learning algorithm', 0.5632), 
   ('supervised learning', 0.6779), 
   ('supervised learning algorithm', 0.6992)], 
- [('given document', 0.4143), 
+ [('document content', 0.3988), 
   ('information retrieval environment', 0.5166), 
   ('information retrieval', 0.5792), 
   ('keywords', 0.6046), 
