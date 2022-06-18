@@ -307,10 +307,10 @@ class _KeyphraseVectorizerMixin():
         max_doc_length = 1000000
         for document in document_list:
             if len(document) > max_doc_length:
-                docs_list.append(self._split_long_document(text=document, max_text_length=max_doc_length))
+                docs_list.extend(self._split_long_document(text=document, max_text_length=max_doc_length))
             else:
-                docs_list.append([document])
-        document_list = [text for split_text in docs_list for text in split_text]
+                docs_list.append(document)
+        document_list = docs_list
         del docs_list
 
         # increase max length of documents that spaCy can parse
