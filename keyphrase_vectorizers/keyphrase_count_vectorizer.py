@@ -68,7 +68,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
     custom_pos_tagger: callable
-            A callable function that that gets a list of strings in a 'raw_documents' parameter and returns a list of (word, POS-tag) tuples.
+            A callable function that that gets a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
             If this parameter is not None, the custom tagger function is used to tag words with Parts-of-Speech, while the spaCy pipeline is ignored.
 
     max_df : int, default=None

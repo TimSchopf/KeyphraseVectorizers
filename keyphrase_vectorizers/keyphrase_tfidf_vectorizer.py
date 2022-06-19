@@ -95,9 +95,10 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
             A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
             Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
-    custom_pos_tagger: callable
-            A callable function that that gets a list of strings in a 'raw_documents' parameter and returns a list of (word, POS-tag) tuples.
+custom_pos_tagger: callable
+            A callable function that that gets a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
             If this parameter is not None, the custom tagger function is used to tag words with Parts-of-Speech, while the spaCy pipeline is ignored.
+
 
     max_df : int, default=None
         During fitting ignore keyphrases that have a document frequency strictly higher than the given threshold.
