@@ -1,3 +1,8 @@
+from typing import List
+
+import flair
+from flair.models import SequenceTagger
+from flair.tokenization import SegtokSentenceSplitter
 from keybert import KeyBERT
 
 import tests.utils as utils
@@ -5,6 +10,7 @@ from keyphrase_vectorizers import KeyphraseCountVectorizer, KeyphraseTfidfVector
 
 english_docs = utils.get_english_test_docs()
 german_docs = utils.get_german_test_docs()
+french_docs = utils.get_french_docs()
 
 
 def test_default_count_vectorizer():
@@ -54,4 +60,54 @@ def test_keybert_integration():
 
     assert keyphrases == english_keybert_keyphrases
 
-# ToDo: add test of spaCy transformer pipelines
+
+def test_french_trf_spacy_pipeline():
+    sorted_french_test_keyphrases = utils.get_french_test_keyphrases()
+    sorted_french_count_matrix = utils.get_sorted_french_count_matrix()
+
+    vectorizer = KeyphraseCountVectorizer(spacy_pipeline='fr_dep_news_trf')
+    vectorizer.fit(french_docs)
+    keyphrases = vectorizer.get_feature_names_out()
+    document_keyphrase_matrix = vectorizer.transform(french_docs).toarray()
+
+    assert [sorted(count_list) for count_list in
+            KeyphraseCountVectorizer(spacy_pipeline='fr_dep_news_trf').fit_transform(
+                french_docs).toarray()] == sorted_french_count_matrix
+    assert [sorted(count_list) for count_list in document_keyphrase_matrix] == sorted_french_count_matrix
+    assert sorted(keyphrases) == sorted_french_test_keyphrases
+
+
+def test_custom_tagger():
+    sorted_english_test_keyphrases = utils.get_sorted_english_keyphrases_custom_flair_tagger()
+
+    tagger = SequenceTagger.load('pos')
+    splitter = SegtokSentenceSplitter()
+
+    def custom_pos_tagger(raw_documents: List[str], tagger: flair.models.SequenceTagger = tagger,
+                          splitter: flair.tokenization.SegtokSentenceSplitter = splitter) -> List[tuple]:
+
+        # split sentences in docs
+        sentences = []
+        for doc in raw_documents:
+            sentences.extend(splitter.split(doc))
+
+        # predict POS tags
+        tagger.predict(sentences)
+
+        pos_tags = []
+        words = []
+        # iterate through sentences and print predicted labels
+        for sentence in sentences:
+            tagger.predict(sentence)
+
+            pos_tags.extend([label.value for label in sentence.get_labels('pos')])
+            words.extend([word.text for word in sentence])
+
+        flair_tags = list(zip(words, pos_tags))
+        return flair_tags
+
+    vectorizer = KeyphraseCountVectorizer(custom_pos_tagger=custom_pos_tagger)
+    vectorizer.fit(english_docs)
+    keyphrases = vectorizer.get_feature_names_out()
+
+    assert sorted(keyphrases) == sorted_english_test_keyphrases

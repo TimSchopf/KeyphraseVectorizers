@@ -36,6 +36,12 @@ def get_german_test_docs():
     return german_docs
 
 
+def get_french_docs():
+    french_docs = ["Les voitures autonomes déplacent la responsabilité de l'assurance vers les constructeurs"]
+
+    return french_docs
+
+
 def get_english_test_keyphrases():
     sorted_english_test_keyphrases = ['algorithm', 'class labels', 'document', 'document content', 'document relevance',
                                       'documents', 'example', 'example input', 'function', 'groups', 'indication',
@@ -48,6 +54,24 @@ def get_english_test_keyphrases():
                                       'various applications', 'vector', 'way']
 
     return sorted_english_test_keyphrases
+
+
+def get_sorted_english_keyphrases_custom_flair_tagger():
+    sorted_english_custom_tagger_keyphrases = ['algorithm', 'class labels', 'document', 'document content',
+                                               'document relevance',
+                                               'documents', 'example', 'example input-output pairs', 'function',
+                                               'groups',
+                                               'indication', 'inductive bias', 'inferred function',
+                                               'information retrieval', 'information retrieval environment', 'input',
+                                               'input object', 'interest', 'keywords', 'learning', 'learning algorithm',
+                                               'list', 'machine', 'main topics', 'new examples',
+                                               'optimal scenario', 'output', 'output value', 'overlap', 'pair',
+                                               'phrases', 'precise summary', 'set', 'supervised learning',
+                                               'supervised learning algorithm', 'supervisory signal', 'task',
+                                               'training data', 'training examples', 'unseen instances',
+                                               'unseen situations', 'users', 'various applications', 'vector', 'way']
+
+    return sorted_english_custom_tagger_keyphrases
 
 
 def get_german_test_keyphrases():
@@ -65,6 +89,12 @@ def get_german_test_keyphrases():
     return sorted_german_test_keyphrases
 
 
+def get_french_test_keyphrases():
+    sorted_french_test_keyphrases = ['assurance', 'constructeurs', 'responsabilité', 'voitures']
+
+    return sorted_french_test_keyphrases
+
+
 def get_sorted_english_count_matrix():
     sorted_english_count_matrix = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2,
@@ -73,6 +103,12 @@ def get_sorted_english_count_matrix():
          1, 1, 1, 2, 2, 5, 5]]
 
     return sorted_english_count_matrix
+
+
+def get_sorted_french_count_matrix():
+    sorted_french_coun_matrix = [[1, 1, 1, 1]]
+
+    return sorted_french_coun_matrix
 
 
 def get_sorted_english_tfidf_matrix():
