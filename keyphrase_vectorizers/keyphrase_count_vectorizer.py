@@ -4,6 +4,7 @@
 .. _POS-tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 .. _regex pattern: https://docs.python.org/3/library/re.html#regular-expression-syntax
 .. _spaCy part-of-speech tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
+.. _spaCy pipeline components: https://spacy.io/usage/processing-pipelines#built-in
 """
 
 import warnings
@@ -62,6 +63,10 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
 
+    spacy_exclude : List[str], default=None
+            A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
+            Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
+
     max_df : int, default=None
         During fitting ignore keyphrases that have a document frequency strictly higher than the given threshold.
 
@@ -79,6 +84,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: Union[str, List[str]] = 'english', lowercase: bool = True, workers: int = 1,
+                 spacy_exclude: List[str] = None,
                  max_df: int = None,
                  min_df: int = None,
                  binary: bool = False, dtype: np.dtype = np.int64):
@@ -129,6 +135,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.stop_words = stop_words
         self.lowercase = lowercase
         self.workers = workers
+        self.spacy_exclude = spacy_exclude
         self.max_df = max_df
         self.min_df = min_df
         self.binary = binary
@@ -153,7 +160,8 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                                                    stop_words=self.stop_words,
                                                    spacy_pipeline=self.spacy_pipeline,
                                                    pos_pattern=self.pos_pattern,
-                                                   lowercase=self.lowercase, workers=self.workers)
+                                                   lowercase=self.lowercase, workers=self.workers,
+                                                   spacy_exclude=self.spacy_exclude)
 
         # remove keyphrases that have more than 8 words, as they are probably no real keyphrases
         # additionally this prevents memory issues during transformation to a document-keyphrase matrix

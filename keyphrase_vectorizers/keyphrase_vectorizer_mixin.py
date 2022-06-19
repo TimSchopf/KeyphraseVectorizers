@@ -3,6 +3,7 @@
 .. _stopwords available in NLTK: https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/stopwords.zip
 .. _POS-tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 .. _regex pattern: https://docs.python.org/3/library/re.html#regular-expression-syntax
+.. _spaCy pipeline components: https://spacy.io/usage/processing-pipelines#built-in
 """
 
 import logging
@@ -180,7 +181,7 @@ class _KeyphraseVectorizerMixin():
             return splitted_document
 
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: Union[str, List[str]], spacy_pipeline: str,
-                            pos_pattern: str,
+                            pos_pattern: str, spacy_exclude: List[str],
                             lowercase: bool = True, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
@@ -200,6 +201,10 @@ class _KeyphraseVectorizerMixin():
 
         pos_pattern : str
             The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
+
+        spacy_exclude : List[str]
+            A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
+            Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.
@@ -230,11 +235,10 @@ class _KeyphraseVectorizerMixin():
             )
 
         # triggers a parameter validation
-        if not isinstance(stop_words, str) and (stop_words is not None):
-            if not all(isinstance(element, str) for element in stop_words):
-                raise ValueError(
-                    "'stop_words' parameter needs to be a string, e.g. 'english' or 'None' or a list of strings."
-                )
+        if not isinstance(stop_words, str) and (stop_words is not None) and (not hasattr(stop_words, '__iter__')):
+            raise ValueError(
+                "'stop_words' parameter needs to be a string, e.g. 'english' or 'None' or a list of strings."
+            )
 
         # triggers a parameter validation
         if not isinstance(spacy_pipeline, str):
@@ -246,6 +250,13 @@ class _KeyphraseVectorizerMixin():
         if not isinstance(pos_pattern, str):
             raise ValueError(
                 "'pos_pattern' parameter needs to be a regex string. E.g. '<J.*>*<N.*>+'"
+            )
+
+        # triggers a parameter validation
+        if ((not hasattr(spacy_exclude, '__iter__')) and (spacy_exclude is not None)) or (
+        isinstance(spacy_exclude, str)):
+            raise ValueError(
+                "'spacy_exclude' parameter needs to be a list of 'spaCy pipeline components' strings."
             )
 
         # triggers a parameter validation
@@ -282,12 +293,11 @@ class _KeyphraseVectorizerMixin():
 
         # add spaCy POS tags for documents
 
-        # ToDo: add parameter to be able to exclude custom pipeline components for faster processing
-        spacy_exclude = []
+        if not spacy_exclude:
+            spacy_exclude = []
         try:
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
-
         except OSError:
             # set logger
             logger = logging.getLogger('KeyphraseVectorizer')
@@ -302,6 +312,8 @@ class _KeyphraseVectorizerMixin():
             spacy.cli.download(spacy_pipeline)
             nlp = spacy.load(spacy_pipeline,
                              exclude=spacy_exclude)
+
+        print(spacy_exclude)
 
         keyphrases_list = []
         if workers != 1:
