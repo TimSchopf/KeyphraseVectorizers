@@ -40,12 +40,13 @@ Table of Contents
 1. [How does it work?](#how-does-it-work)
 2. [Installation](#installation)
 3. [Usage](#usage)
-   1. [KeyphraseCountVectorizer](#KeyphraseCountVectorizer)
+   1. [KeyphraseCountVectorizer](#keyphrasecountvectorizer)
       1. [English language](#english-language)
       2. [Other languages](#other-languages)
-   2. [KeyphraseTfidfVectorizer](#KeyphraseTfidfVectorizer)
-   3. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
-   4. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
+   2. [KeyphraseTfidfVectorizer](#keyphrasetfidfvectorizer)
+   3. [Custom POS-tagger](#custom-pos-tagger)
+   4. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
+   5. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
 
 <!--te-->
 
@@ -82,7 +83,7 @@ Usage
 For detailed information visit
 the [API Guide](https://keyphrase-vectorizers.readthedocs.io/en/latest/index.html "Keyphrase_Vectorizers API Guide").
 
-<a name="#KeyphraseCountVectorizer"/></a>
+<a name="#keyphrasecountvectorizer"/></a>
 
 ### KeyphraseCountVectorizer
 
@@ -202,7 +203,7 @@ tags differ from the English ones, the `pos_pattern` parameter is also customize
 extracts keywords that have 0 or more adjectives, followed by 1 or more nouns using the German spaCy part-of-speech
 tags.
 
-<a name="#KeyphraseTfidfVectorizer"/></a>
+<a name="#keyphrasetfidfvectorizer"/></a>
 
 ### KeyphraseTfidfVectorizer
 
@@ -282,6 +283,105 @@ print(keyphrases)
  'training data' 'example' 'optimal scenario' 'information retrieval'
  'output' 'groups' 'indication' 'unseen instances' 'keywords' 'way'
  'phrases' 'overlap' 'users' 'learning algorithm' 'document']
+```
+
+<a name="##custom-pos-tagger"/></a>
+
+### Custom POS-tagger
+
+[Back to Table of Contents](#toc)
+
+To use a different part-of-speech tagger than the ones provided by spaCy, a custom POS-tagger function can be defined and passed to the KeyphraseVectorizers via the `custom_pos_tagger` parameter. This parameter expects a callable function which in turn needs to expect a list of strings in a 'raw_documents' parameter and has to return a list of (word token, POS-tag) tuples. If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
+
+#### Example using flair:
+
+Flair can be installed via `pip install flair`.
+
+```python
+from typing import List
+import flair
+from flair.models import SequenceTagger
+from flair.tokenization import SegtokSentenceSplitter
+
+
+docs = ["""Supervised learning is the machine learning task of learning a function that
+         maps an input to an output based on example input-output pairs. It infers a
+         function from labeled training data consisting of a set of training examples.
+         In supervised learning, each example is a pair consisting of an input object
+         (typically a vector) and a desired output value (also called the supervisory signal). 
+         A supervised learning algorithm analyzes the training data and produces an inferred function, 
+         which can be used for mapping new examples. An optimal scenario will allow for the 
+         algorithm to correctly determine the class labels for unseen instances. This requires 
+         the learning algorithm to generalize from the training data to unseen situations in a 
+         'reasonable' way (see inductive bias).""", 
+             
+        """Keywords are defined as phrases that capture the main topics discussed in a document. 
+        As they offer a brief yet precise summary of document content, they can be utilized for various applications. 
+        In an information retrieval environment, they serve as an indication of document relevance for users, as the list 
+        of keywords can quickly help to determine whether a given document is relevant to their interest. 
+        As keywords reflect a document's main topics, they can be utilized to classify documents into groups 
+        by measuring the overlap between the keywords assigned to them. Keywords are also used proactively 
+        in information retrieval."""]
+
+# define flair POS-tagger and splitter
+tagger = SequenceTagger.load('pos')
+splitter = SegtokSentenceSplitter()
+
+# define custom POS-tagger function using flair
+def custom_pos_tagger(raw_documents: List[str], tagger: flair.models.SequenceTagger = tagger, splitter: flair.tokenization.SegtokSentenceSplitter = splitter)->List[tuple]:
+    """
+    Important: 
+
+    The mandatory 'raw_documents' parameter can NOT be named differently and has to expect a list of strings. 
+    Any other parameter of the custom POS-tagger function can be arbitrarily defined, depending on the respective use case. 
+    Furthermore the function has to return a list of (word token, POS-tag) tuples.
+    """ 
+    # split texts into sentences
+    sentences = []
+    for doc in raw_documents:
+        sentences.extend(splitter.split(doc))
+
+    # predict POS tags
+    tagger.predict(sentences)
+
+    # iterate through sentences to get word tokens and predicted POS-tags
+    pos_tags = []
+    words = []
+    for sentence in sentences:
+        pos_tags.extend([label.value for label in sentence.get_labels('pos')])
+        words.extend([word.text for word in sentence])
+    
+    return list(zip(words, pos_tags))
+
+
+# check that the custom POS-tagger function returns a list of (word token, POS-tag) tuples
+print(custom_pos_tagger(raw_documents=docs))
+
+>>> [('Supervised', 'VBN'), ('learning', 'NN'), ('is', 'VBZ'), ('the', 'DT'), ('machine', 'NN'), ('learning', 'VBG'), ('task', 'NN'), ('of', 'IN'), ('learning', 'VBG'), ('a', 'DT'), ('function', 'NN'), ('that', 'WDT'), ('maps', 'VBZ'), ('an', 'DT'), ('input', 'NN'), ('to', 'IN'), ('an', 'DT'), ('output', 'NN'), ('based', 'VBN'), ('on', 'IN'), ('example', 'NN'), ('input-output', 'NN'), ('pairs', 'NNS'), ('.', '.'), ('It', 'PRP'), ('infers', 'VBZ'), ('a', 'DT'), ('function', 'NN'), ('from', 'IN'), ('labeled', 'VBN'), ('training', 'NN'), ('data', 'NNS'), ('consisting', 'VBG'), ('of', 'IN'), ('a', 'DT'), ('set', 'NN'), ('of', 'IN'), ('training', 'NN'), ('examples', 'NNS'), ('.', '.'), ('In', 'IN'), ('supervised', 'JJ'), ('learning', 'NN'), (',', ','), ('each', 'DT'), ('example', 'NN'), ('is', 'VBZ'), ('a', 'DT'), ('pair', 'NN'), ('consisting', 'VBG'), ('of', 'IN'), ('an', 'DT'), ('input', 'NN'), ('object', 'NN'), ('(', ':'), ('typically', 'RB'), ('a', 'DT'), ('vector', 'NN'), (')', ','), ('and', 'CC'), ('a', 'DT'), ('desired', 'VBN'), ('output', 'NN'), ('value', 'NN'), ('(', ','), ('also', 'RB'), ('called', 'VBN'), ('the', 'DT'), ('supervisory', 'JJ'), ('signal', 'NN'), (')', '-RRB-'), ('.', '.'), ('A', 'DT'), ('supervised', 'JJ'), ('learning', 'NN'), ('algorithm', 'NN'), ('analyzes', 'VBZ'), ('the', 'DT'), ('training', 'NN'), ('data', 'NNS'), ('and', 'CC'), ('produces', 'VBZ'), ('an', 'DT'), ('inferred', 'JJ'), ('function', 'NN'), (',', ','), ('which', 'WDT'), ('can', 'MD'), ('be', 'VB'), ('used', 'VBN'), ('for', 'IN'), ('mapping', 'VBG'), ('new', 'JJ'), ('examples', 'NNS'), ('.', '.'), ('An', 'DT'), ('optimal', 'JJ'), ('scenario', 'NN'), ('will', 'MD'), ('allow', 'VB'), ('for', 'IN'), ('the', 'DT'), ('algorithm', 'NN'), ('to', 'TO'), ('correctly', 'RB'), ('determine', 'VB'), ('the', 'DT'), ('class', 'NN'), ('labels', 'NNS'), ('for', 'IN'), ('unseen', 'JJ'), ('instances', 'NNS'), ('.', '.'), ('This', 'DT'), ('requires', 'VBZ'), ('the', 'DT'), ('learning', 'NN'), ('algorithm', 'NN'), ('to', 'TO'), ('generalize', 'VB'), ('from', 'IN'), ('the', 'DT'), ('training', 'NN'), ('data', 'NNS'), ('to', 'IN'), ('unseen', 'JJ'), ('situations', 'NNS'), ('in', 'IN'), ('a', 'DT'), ("'", '``'), ('reasonable', 'JJ'), ("'", "''"), ('way', 'NN'), ('(', ','), ('see', 'VB'), ('inductive', 'JJ'), ('bias', 'NN'), (')', '-RRB-'), ('.', '.'), ('Keywords', 'NNS'), ('are', 'VBP'), ('defined', 'VBN'), ('as', 'IN'), ('phrases', 'NNS'), ('that', 'WDT'), ('capture', 'VBP'), ('the', 'DT'), ('main', 'JJ'), ('topics', 'NNS'), ('discussed', 'VBN'), ('in', 'IN'), ('a', 'DT'), ('document', 'NN'), ('.', '.'), ('As', 'IN'), ('they', 'PRP'), ('offer', 'VBP'), ('a', 'DT'), ('brief', 'JJ'), ('yet', 'CC'), ('precise', 'JJ'), ('summary', 'NN'), ('of', 'IN'), ('document', 'NN'), ('content', 'NN'), (',', ','), ('they', 'PRP'), ('can', 'MD'), ('be', 'VB'), ('utilized', 'VBN'), ('for', 'IN'), ('various', 'JJ'), ('applications', 'NNS'), ('.', '.'), ('In', 'IN'), ('an', 'DT'), ('information', 'NN'), ('retrieval', 'NN'), ('environment', 'NN'), (',', ','), ('they', 'PRP'), ('serve', 'VBP'), ('as', 'IN'), ('an', 'DT'), ('indication', 'NN'), ('of', 'IN'), ('document', 'NN'), ('relevance', 'NN'), ('for', 'IN'), ('users', 'NNS'), (',', ','), ('as', 'IN'), ('the', 'DT'), ('list', 'NN'), ('of', 'IN'), ('keywords', 'NNS'), ('can', 'MD'), ('quickly', 'RB'), ('help', 'VB'), ('to', 'TO'), ('determine', 'VB'), ('whether', 'IN'), ('a', 'DT'), ('given', 'VBN'), ('document', 'NN'), ('is', 'VBZ'), ('relevant', 'JJ'), ('to', 'IN'), ('their', 'PRP$'), ('interest', 'NN'), ('.', '.'), ('As', 'IN'), ('keywords', 'NNS'), ('reflect', 'VBP'), ('a', 'DT'), ('document', 'NN'), ("'s", 'POS'), ('main', 'JJ'), ('topics', 'NNS'), (',', ','), ('they', 'PRP'), ('can', 'MD'), ('be', 'VB'), ('utilized', 'VBN'), ('to', 'TO'), ('classify', 'VB'), ('documents', 'NNS'), ('into', 'IN'), ('groups', 'NNS'), ('by', 'IN'), ('measuring', 'VBG'), ('the', 'DT'), ('overlap', 'NN'), ('between', 'IN'), ('the', 'DT'), ('keywords', 'NNS'), ('assigned', 'VBN'), ('to', 'IN'), ('them', 'PRP'), ('.', '.'), ('Keywords', 'NNS'), ('are', 'VBP'), ('also', 'RB'), ('used', 'VBN'), ('proactively', 'RB'), ('in', 'IN'), ('information', 'NN'), ('retrieval', 'NN'), ('.', '.')]
+```
+
+After the custom POS-tagger function is defined, it can be passed to KeyphraseVectorizers via the `custom_pos_tagger` parameter.
+
+```python
+from keyphrase_vectorizers import KeyphraseCountVectorizer
+
+# use custom POS-tagger with KeyphraseVectorizers
+vectorizer = KeyphraseCountVectorizer(custom_pos_tagger=custom_pos_tagger)
+vectorizer.fit(docs)
+keyphrases = vectorizer.get_feature_names_out()
+print(keyphrases)
+
+>>>['output value' 'information retrieval' 'algorithm' 'vector' 'groups'
+ 'main topics' 'task' 'precise summary' 'supervised learning'
+ 'inductive bias' 'information retrieval environment'
+ 'supervised learning algorithm' 'function' 'input' 'pair'
+ 'document relevance' 'learning' 'class labels' 'new examples' 'keywords'
+ 'list' 'machine' 'training data' 'unseen situations' 'phrases' 'output'
+ 'optimal scenario' 'document' 'training examples' 'documents' 'interest'
+ 'indication' 'learning algorithm' 'inferred function'
+ 'various applications' 'example' 'set' 'unseen instances'
+ 'example input-output pairs' 'way' 'users' 'input object'
+ 'supervisory signal' 'overlap' 'document content']
 ```
 
 <a name="#keyphrase-extraction-with-keybert"/></a>
