@@ -206,9 +206,9 @@ class _KeyphraseVectorizerMixin():
             A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
             Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
-        custom_pos_tagger: callable
-            A callable function that that gets a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
-            If this parameter is not None, the custom tagger function is used to tag words with Parts-of-Speech, while the spaCy pipeline is ignored.
+    custom_pos_tagger: callable
+            A callable function which expects a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
+            If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
 
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.

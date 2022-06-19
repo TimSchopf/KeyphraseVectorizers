@@ -83,10 +83,16 @@ def test_custom_tagger():
     tagger = SequenceTagger.load('pos')
     splitter = SegtokSentenceSplitter()
 
+    # define custom pos tagger function using flair
     def custom_pos_tagger(raw_documents: List[str], tagger: flair.models.SequenceTagger = tagger,
                           splitter: flair.tokenization.SegtokSentenceSplitter = splitter) -> List[tuple]:
+        """
+        Important:
 
-        # split sentences in docs
+        The mandatory 'raw_documents' parameter can NOT be named differently and has to expect a list of strings.
+        Furthermore the function has to return a list of (word token, POS-tag) tuples.
+        """
+        # split texts into sentences
         sentences = []
         for doc in raw_documents:
             sentences.extend(splitter.split(doc))
@@ -94,17 +100,14 @@ def test_custom_tagger():
         # predict POS tags
         tagger.predict(sentences)
 
+        # iterate through sentences to get word tokens and predicted POS-tags
         pos_tags = []
         words = []
-        # iterate through sentences and print predicted labels
         for sentence in sentences:
-            tagger.predict(sentence)
-
             pos_tags.extend([label.value for label in sentence.get_labels('pos')])
             words.extend([word.text for word in sentence])
 
-        flair_tags = list(zip(words, pos_tags))
-        return flair_tags
+        return list(zip(words, pos_tags))
 
     vectorizer = KeyphraseCountVectorizer(custom_pos_tagger=custom_pos_tagger)
     vectorizer.fit(english_docs)
