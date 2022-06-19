@@ -7,7 +7,7 @@
 
 import logging
 import os
-from typing import List
+from typing import List, Union
 
 import nltk
 import numpy as np
@@ -179,7 +179,8 @@ class _KeyphraseVectorizerMixin():
                                                                max_text_length=max_text_length)
             return splitted_document
 
-    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str,
+    def _get_pos_keyphrases(self, document_list: List[str], stop_words: Union[str, List[str]], spacy_pipeline: str,
+                            pos_pattern: str,
                             lowercase: bool = True, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
@@ -188,10 +189,11 @@ class _KeyphraseVectorizerMixin():
         document_list : list of str
             List of text documents from which to extract the keyphrases.
 
-        stop_words : str
+        stop_words : Union[str, List[str]]
             Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
+            If given a list of custom stopwords, removes them instead.
 
         spacy_pipeline : str
             The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text.
@@ -229,9 +231,10 @@ class _KeyphraseVectorizerMixin():
 
         # triggers a parameter validation
         if not isinstance(stop_words, str) and (stop_words is not None):
-            raise ValueError(
-                "'stop_words' parameter needs to be a string, e.g. 'english' or 'None'"
-            )
+            if not all(isinstance(element, str) for element in stop_words):
+                raise ValueError(
+                    "'stop_words' parameter needs to be a string, e.g. 'english' or 'None' or a list of strings."
+                )
 
         # triggers a parameter validation
         if not isinstance(spacy_pipeline, str):
@@ -258,7 +261,7 @@ class _KeyphraseVectorizerMixin():
             )
 
         stop_words_list = []
-        if stop_words:
+        if isinstance(stop_words, str):
             try:
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
             except LookupError:
@@ -273,6 +276,9 @@ class _KeyphraseVectorizerMixin():
                     'It looks like you do not have downloaded a list of stopwords yet. It is attempted to download the stopwords now.')
                 nltk.download('stopwords')
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
+
+        elif hasattr(stop_words, '__iter__'):
+            stop_words_list = stop_words
 
         # add spaCy POS tags for documents
 
@@ -319,40 +325,33 @@ class _KeyphraseVectorizerMixin():
 
         cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
         for tagged_doc in nlp.pipe(document_list, n_process=workers):
-            tagged_pos_doc = []
-            for sentence in tagged_doc.sents:
-                pos_tagged_sentence = []
-                for word in sentence:
-                    pos_tagged_sentence.append((word.text, word.tag_))
-                tagged_pos_doc.append(pos_tagged_sentence)
+            pos_tuples = [(word.text, word.tag_) for word in tagged_doc]
 
             # extract keyphrases that match the NLTK RegexpParser filter
             keyphrases = []
-            prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
-            suffix_list = [' ' + stop_word for stop_word in stop_words_list]
-            for sentence in tagged_pos_doc:
-                tree = cp.parse(sentence)
-                for subtree in tree.subtrees():
-                    if subtree.label() == 'CHUNK':
-                        # join candidate keyphrase from single words
-                        keyphrase = ' '.join([i[0] for i in subtree.leaves()])
+            # prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
+            # suffix_list = [' ' + stop_word for stop_word in stop_words_list]
+            tree = cp.parse(pos_tuples)
+            for subtree in tree.subtrees(filter=lambda tuple: tuple.label() == 'CHUNK'):
+                # join candidate keyphrase from single words
+                keyphrase = ' '.join([i[0] for i in subtree.leaves()])
 
-                        # convert keyphrase to lowercase
-                        if lowercase:
-                            keyphrase = keyphrase.lower()
+                # convert keyphrase to lowercase
+                if lowercase:
+                    keyphrase = keyphrase.lower()
 
-                        # remove stopword suffixes
-                        keyphrase = self._remove_suffixes(keyphrase, suffix_list)
+                # remove stopword suffixes
+                # keyphrase = self._remove_suffixes(keyphrase, suffix_list)
 
-                        # remove stopword prefixes
-                        keyphrase = self._remove_prefixes(keyphrase, prefix_list)
+                # remove stopword prefixes
+                # keyphrase = self._remove_prefixes(keyphrase, prefix_list)
 
-                        # remove whitespace from the beginning and end of keyphrases
-                        keyphrase = keyphrase.strip()
+                # remove whitespace from the beginning and end of keyphrases
+                keyphrase = keyphrase.strip()
 
-                        # do not include single keywords that are actually stopwords
-                        if keyphrase.lower() not in stop_words_list:
-                            keyphrases.append(keyphrase)
+                # do not include single keywords that are actually stopwords
+                if keyphrase.lower() not in stop_words_list:
+                    keyphrases.append(keyphrase)
 
             # remove potential empty keyphrases
             keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']

@@ -7,7 +7,7 @@
 """
 
 import warnings
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import psutil
@@ -73,10 +73,11 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
         Standard is to only select keyphrases that have 0 or more adjectives, followed by 1 or more nouns.
 
-    stop_words : str, default=None
+    stop_words : Union[str, List[str]], default='english'
             Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
+            If given a list of custom stopwords, removes them instead.
 
     lowercase : bool, default=True
         Whether the returned keyphrases should be converted to lowercase.
@@ -84,7 +85,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
     workers :int, default=1
             How many workers to use for spaCy part-of-speech tagging.
             If set to -1, use all available worker threads of the machine.
-            spaCy uses the specified number of cores to tag documents with part-of-speech.
+            SpaCy uses the specified number of cores to tag documents with part-of-speech.
             Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
@@ -122,7 +123,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
     """
 
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
-                 stop_words: str = None,
+                 stop_words: Union[str, List[str]] = 'english',
                  lowercase: bool = True, workers: int = 1, max_df: int = None, min_df: int = None,
                  binary: bool = False,
                  dtype: np.dtype = np.float64, norm: str = "l2",

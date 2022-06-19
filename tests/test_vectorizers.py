@@ -53,3 +53,5 @@ def test_keybert_integration():
     keyphrases = [[element[0] for element in keyphrases_list] for keyphrases_list in keyphrases]
 
     assert keyphrases == english_keybert_keyphrases
+
+# ToDo: add test of spaCy transformer pipelines
