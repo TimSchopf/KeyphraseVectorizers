@@ -293,7 +293,7 @@ print(keyphrases)
 
 To use a different part-of-speech tagger than the ones provided by spaCy, a custom POS-tagger function can be defined and passed to the KeyphraseVectorizers via the `custom_pos_tagger` parameter. This parameter expects a callable function which in turn needs to expect a list of strings in a 'raw_documents' parameter and has to return a list of (word token, POS-tag) tuples. If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
 
-#### Example using flair:
+#### Example using [flair](https://github.com/flairNLP/flair "flair GitHub"):
 
 Flair can be installed via `pip install flair`.
 
