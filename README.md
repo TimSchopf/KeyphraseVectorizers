@@ -403,10 +403,7 @@ Second, even after finding a good n-gram range, the returned keyphrases are some
 correct or are slightly off-key. Unfortunately, this limits the quality of the returned keyphrases.
 
 To adress this issue, we can use the vectorizers of this package to first extract candidate keyphrases that consist of
-zero or more adjectives, followed by one or multiple nouns in a pre-processing step instead of simple n-grams.
-[Wan and Xiao](https://www.aaai.org/Papers/AAAI/2008/AAAI08-136.pdf) successfully used this noun phrase approach for
-keyphrase extraction during their research in 2008. The extracted candidate keyphrases are subsequently passed to
-KeyBERT for embedding generation and similarity calculation. To use both packages for keyphrase extraction, we need to
+zero or more adjectives, followed by one or multiple nouns in a pre-processing step instead of simple n-grams. [TextRank](https://web.eecs.umich.edu/~mihalcea/papers/mihalcea.emnlp04.pdf), [SingleRank](https://www.aaai.org/Papers/AAAI/2008/AAAI08-136.pdf), and [EmbedRank](https://aclanthology.org/K18-1022.pdf) already successfully used this noun phrase approach for keyphrase extraction. The extracted candidate keyphrases are subsequently passed to KeyBERT for embedding generation and similarity calculation. To use both packages for keyphrase extraction, we need to
 pass KeyBERT a keyphrase vectorizer with the `vectorizer` parameter. Since the length of keyphrases now depends on
 part-of-speech tags, there is no need to define an n-gram length anymore.
 
