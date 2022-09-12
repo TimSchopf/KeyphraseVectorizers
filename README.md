@@ -7,7 +7,7 @@
 KeyphraseVectorizers
 ===================== 
 
-**This package was developed during writing our PatternRank paper. You can check out a preprint of the accepted paper [here](https://wwwmatthes.in.tum.de/file/169wf9q9cyxne/Sebis-Public-Website/-/PatternRank-Leveraging-Pretrained-Language-Models-and-Part-of-Speech-for-Unsupervised-Keyphrase-Extraction/PatternRank.pdf). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
+**This package was developed during the writing of our PatternRank paper. You can check out a preprint of the accepted paper [here](https://wwwmatthes.in.tum.de/file/169wf9q9cyxne/Sebis-Public-Website/-/PatternRank-Leveraging-Pretrained-Language-Models-and-Part-of-Speech-for-Unsupervised-Keyphrase-Extraction/PatternRank.pdf). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
 
 Set of vectorizers that extract keyphrases with part-of-speech patterns from a collection of text documents and convert
 them into a document-keyphrase matrix. A document-keyphrase matrix is a mathematical matrix that describes the frequency
