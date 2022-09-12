@@ -7,6 +7,8 @@
 KeyphraseVectorizers
 ===================== 
 
+**This package was developed during writing our PatternRank paper. You can check out a preprint of the accepted paper [here](https://wwwmatthes.in.tum.de/file/169wf9q9cyxne/Sebis-Public-Website/-/PatternRank-Leveraging-Pretrained-Language-Models-and-Part-of-Speech-for-Unsupervised-Keyphrase-Extraction/PatternRank.pdf). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
+
 Set of vectorizers that extract keyphrases with part-of-speech patterns from a collection of text documents and convert
 them into a document-keyphrase matrix. A document-keyphrase matrix is a mathematical matrix that describes the frequency
 of keyphrases that occur in a collection of documents. The matrix rows indicate the text documents and columns indicate
@@ -47,6 +49,7 @@ Table of Contents
    3. [Custom POS-tagger](#custom-pos-tagger)
    4. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
    5. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
+4. [Citation information](#citation-information)
 
 <!--te-->
 
@@ -610,3 +613,17 @@ topics, probs = topic_model.fit_transform(docs)
   ('chip', 0.010785744492767285)],
  ...
 ```
+### Citation information
+
+[Back to Table of Contents](#toc)
+
+When citing KeyphraseVectorizers or PatternRank in academic papers and theses, please use this BibTeX entry:
+``` 
+@conference{kdir22, 
+author={Tim Schopf and Simon Klimek and Florian Matthes}, 
+title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction}, 
+booktitle={Proceedings of the 14th International Joint Conference on Knowledge Discovery, Knowledge Engineering and Knowledge Management (IC3K 2022)}, year={2022}, 
+publisher={SciTePress}, 
+organization={INSTICC}
+}
+``` 
