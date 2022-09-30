@@ -623,10 +623,11 @@ When citing KeyphraseVectorizers or PatternRank in academic papers and theses, p
 author={Tim Schopf and Simon Klimek and Florian Matthes}, 
 title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction}, 
 booktitle={Proceedings of the 14th International Joint Conference on Knowledge Discovery, Knowledge Engineering and Knowledge Management - Volume 1: KDIR},
-year={2022}, 
-publisher={SciTePress}, 
+year={2022},
+pages={243-248},
+publisher={SciTePress},
 organization={INSTICC},
+isbn={978-989-758-614-9},
 issn={2184-3228},
-pages={241-246}
 }
 ``` 
