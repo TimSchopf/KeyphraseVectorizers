@@ -619,7 +619,7 @@ topics, probs = topic_model.fit_transform(docs)
 
 When citing KeyphraseVectorizers or PatternRank in academic papers and theses, please use this BibTeX entry:
 ``` 
-@conference{schopf_et_al_kdir22, 
+@conference{schopf_etal_kdir22, 
 author={Tim Schopf and Simon Klimek and Florian Matthes}, 
 title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction}, 
 booktitle={Proceedings of the 14th International Joint Conference on Knowledge Discovery, Knowledge Engineering and Knowledge Management - KDIR},
