@@ -3,11 +3,12 @@
 [![PyPI - PyPi](https://img.shields.io/pypi/v/keyphrase-vectorizers.svg)](https://pypi.org/project/keyphrase-vectorizers/)
 [![Build](https://img.shields.io/github/workflow/status/TimSchopf/KeyphraseVectorizers/Code%20tests/master)](https://pypi.org/project/keyphrase-vectorizers/)
 [![Documentation Status](https://readthedocs.org/projects/keyphrase-vectorizers/badge/?version=latest)](https://keyphrase-vectorizers.readthedocs.io/en/latest/?badge=latest)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/patternrank-leveraging-pretrained-language/keyphrase-extraction-on-inspec)](https://paperswithcode.com/sota/keyphrase-extraction-on-inspec?p=patternrank-leveraging-pretrained-language)
 
 KeyphraseVectorizers
 ===================== 
 
-**This package was developed during the writing of our PatternRank paper. You can check out a preprint of the accepted paper [here](https://wwwmatthes.in.tum.de/file/169wf9q9cyxne/Sebis-Public-Website/-/PatternRank-Leveraging-Pretrained-Language-Models-and-Part-of-Speech-for-Unsupervised-Keyphrase-Extraction/PatternRank.pdf). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
+**This package was developed during the writing of our PatternRank paper. You can check out a preprint of the accepted paper [here](https://arxiv.org/abs/2210.05245). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
 
 Set of vectorizers that extract keyphrases with part-of-speech patterns from a collection of text documents and convert
 them into a document-keyphrase matrix. A document-keyphrase matrix is a mathematical matrix that describes the frequency
