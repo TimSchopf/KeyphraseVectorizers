@@ -48,7 +48,7 @@ Table of Contents
       2. [Other languages](#other-languages)
    2. [KeyphraseTfidfVectorizer](#keyphrasetfidfvectorizer)
    3. [Custom POS-tagger](#custom-pos-tagger)
-   4. [Keyphrase extraction with KeyBERT](#keyphrase-extraction-with-keybert)
+   4. [PatternRank: Keyphrase extraction with KeyphraseVectorizers and KeyBERT](#patternrank-keyphrase-extraction-with-keyphrasevectorizers-and-keybert)
    5. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
 4. [Citation information](#citation-information)
 
@@ -388,15 +388,13 @@ print(keyphrases)
  'supervisory signal' 'overlap' 'document content']
 ```
 
-<a name="#keyphrase-extraction-with-keybert"/></a>
+<a name="#patternrank-keyphrase-extraction-with-keyphrasevectorizers-and-keybert"/></a>
 
-### Keyphrase extraction with [KeyBERT](https://github.com/MaartenGr/KeyBERT "KeyBERT repository")
+### [PatternRank:](https://arxiv.org/abs/2210.05245) Keyphrase extraction with KeyphraseVectorizers and [KeyBERT](https://github.com/MaartenGr/KeyBERT "KeyBERT repository")
 
 [Back to Table of Contents](#toc)
 
-The keyphrase vectorizers can be used together with KeyBERT to extract grammatically correct keyphrases that are most
-similar to a document. Thereby, the vectorizer first extracts candidate keyphrases from the text documents, which are
-subsequently ranked by KeyBERT based on their document similarity. The top-n most similar keyphrases can then be
+Using the keyphrase vectorizers together with KeyBERT for keyphrase extraction results in the [PatternRank](https://arxiv.org/abs/2210.05245) approach. PatternRank can extract grammatically correct keyphrases that are most similar to a document. Thereby, the vectorizer first extracts candidate keyphrases from the text documents, which are subsequently ranked by KeyBERT based on their document similarity. The top-n most similar keyphrases can then be
 considered as document keywords.
 
 The advantage of using KeyphraseVectorizers in addition to KeyBERT is that it allows users to get grammatically correct
