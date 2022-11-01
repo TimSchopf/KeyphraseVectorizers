@@ -8,7 +8,7 @@
 KeyphraseVectorizers
 ===================== 
 
-**This package was developed during the writing of our PatternRank paper. You can check out a preprint of the accepted paper [here](https://arxiv.org/abs/2210.05245). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
+**This package was developed during the writing of our PatternRank paper. You can check out the paper [here](https://arxiv.org/abs/2210.05245). When using KeyphraseVectorizers or PatternRank in academic papers and theses, please use the [BibTeX entry below](#citation-information).**
 
 Set of vectorizers that extract keyphrases with part-of-speech patterns from a collection of text documents and convert
 them into a document-keyphrase matrix. A document-keyphrase matrix is a mathematical matrix that describes the frequency
@@ -22,7 +22,7 @@ and
 classes. Instead of using n-gram tokens of a pre-defined range, these classes extract keyphrases from text documents
 using part-of-speech tags to compute document-keyphrase matrices.
 
-Corresponding medium post can be found [here](https://towardsdatascience.com/enhancing-keybert-keyword-extraction-results-with-keyphrasevectorizers-3796fa93f4db "Keyphrase Extraction with BERT Transformers and Noun Phrases").
+Corresponding medium posts can be found [here](https://towardsdatascience.com/enhancing-keybert-keyword-extraction-results-with-keyphrasevectorizers-3796fa93f4db "Keyphrase Extraction with BERT Transformers and Noun Phrases") and [here](https://towardsdatascience.com/unsupervised-keyphrase-extraction-with-patternrank-28ec3ca737f0 "Unsupervised Keyphrase Extraction with PatternRank").
 
 Benefits
 --------
@@ -618,14 +618,15 @@ topics, probs = topic_model.fit_transform(docs)
 
 When citing KeyphraseVectorizers or PatternRank in academic papers and theses, please use this BibTeX entry:
 ``` 
-@conference{schopf_etal_kdir22, 
-author={Tim Schopf and Simon Klimek and Florian Matthes}, 
-title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction}, 
+@conference{schopf_etal_kdir22,
+author={Tim Schopf and Simon Klimek and Florian Matthes},
+title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction},
 booktitle={Proceedings of the 14th International Joint Conference on Knowledge Discovery, Knowledge Engineering and Knowledge Management - KDIR},
 year={2022},
 pages={243-248},
 publisher={SciTePress},
 organization={INSTICC},
+doi={10.5220/0011546600003335},
 isbn={978-989-758-614-9},
 issn={2184-3228},
 }
