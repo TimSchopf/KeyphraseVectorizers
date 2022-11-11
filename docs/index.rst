@@ -8,7 +8,7 @@ Welcome to the KeyphraseVectorizers documentation!
    KeyphraseVectorizers
 
 .. toctree::
-   :caption: API Giude:
+   :caption: API Guide:
 
    api
 
