@@ -12,6 +12,7 @@ from typing import List, Union
 
 import numpy as np
 import psutil
+import spacy
 from sklearn.exceptions import NotFittedError
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.utils.validation import FLOAT_DTYPES
@@ -67,8 +68,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     Parameters
     ----------
-    spacy_pipeline : str, default='en_core_web_sm'
-            The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text. Standard is the 'en' pipeline.
+    spacy_pipeline : Union[str, spacy.Language], default='en_core_web_sm'
+            A spacy.Language object or the name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text. Standard is the 'en' pipeline.
 
     pos_pattern :  str, default='<J.*>*<N.*>+'
         The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
@@ -131,7 +132,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     """
 
-    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
+    def __init__(self, spacy_pipeline: Union[str, spacy.Language] = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: Union[str, List[str]] = 'english',
                  lowercase: bool = True, workers: int = 1, spacy_exclude: List[str] = None,
                  custom_pos_tagger: callable = None, max_df: int = None, min_df: int = None,

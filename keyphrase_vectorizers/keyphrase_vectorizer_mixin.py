@@ -180,7 +180,7 @@ class _KeyphraseVectorizerMixin():
                                                                max_text_length=max_text_length)
             return splitted_document
 
-    def _get_pos_keyphrases(self, document_list: List[str], stop_words: Union[str, List[str]], spacy_pipeline: str,
+    def _get_pos_keyphrases(self, document_list: List[str], stop_words: Union[str, List[str]], spacy_pipeline: Union[str, spacy.Language],
                             pos_pattern: str, spacy_exclude: List[str], custom_pos_tagger: callable,
                             lowercase: bool = True, workers: int = 1) -> List[str]:
         """
@@ -196,8 +196,8 @@ class _KeyphraseVectorizerMixin():
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
             If given a list of custom stopwords, removes them instead.
 
-        spacy_pipeline : str
-            The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text.
+        spacy_pipeline : Union[str, spacy.Language]
+            A spacy.Language object or the name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text.
 
         pos_pattern : str
             The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
@@ -245,9 +245,9 @@ class _KeyphraseVectorizerMixin():
             )
 
         # triggers a parameter validation
-        if not isinstance(spacy_pipeline, str):
+        if not isinstance(spacy_pipeline, (str, spacy.Language)):
             raise ValueError(
-                "'spacy_pipeline' parameter needs to be a spaCy pipeline string. E.g. 'en_core_web_sm'"
+                "'spacy_pipeline' parameter needs to be a spacy.Language object or a spaCy pipeline string. E.g. 'en_core_web_sm'"
             )
 
         # triggers a parameter validation
@@ -304,25 +304,28 @@ class _KeyphraseVectorizerMixin():
 
         # add spaCy POS tags for documents
         if not custom_pos_tagger:
-            if not spacy_exclude:
-                spacy_exclude = []
-            try:
-                nlp = spacy.load(spacy_pipeline,
-                                 exclude=spacy_exclude)
-            except OSError:
-                # set logger
-                logger = logging.getLogger('KeyphraseVectorizer')
-                logger.setLevel(logging.WARNING)
-                sh = logging.StreamHandler()
-                sh.setFormatter(logging.Formatter(
-                    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-                logger.addHandler(sh)
-                logger.setLevel(logging.DEBUG)
-                logger.info(
-                    'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
-                spacy.cli.download(spacy_pipeline)
-                nlp = spacy.load(spacy_pipeline,
-                                 exclude=spacy_exclude)
+            if isinstance(spacy_pipeline, spacy.Language):
+                nlp = spacy_pipeline
+            else:
+                if not spacy_exclude:
+                    spacy_exclude = []
+                try:
+                    nlp = spacy.load(spacy_pipeline,
+                                     exclude=spacy_exclude)
+                except OSError:
+                    # set logger
+                    logger = logging.getLogger('KeyphraseVectorizer')
+                    logger.setLevel(logging.WARNING)
+                    sh = logging.StreamHandler()
+                    sh.setFormatter(logging.Formatter(
+                        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                    logger.addHandler(sh)
+                    logger.setLevel(logging.DEBUG)
+                    logger.info(
+                        'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
+                    spacy.cli.download(spacy_pipeline)
+                    nlp = spacy.load(spacy_pipeline,
+                                     exclude=spacy_exclude)
 
         if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
