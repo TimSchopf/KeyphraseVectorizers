@@ -1,6 +1,7 @@
 from typing import List
 
 import flair
+import spacy
 from flair.models import SequenceTagger
 from flair.tokenization import SegtokSentenceSplitter
 from keybert import KeyBERT
@@ -18,6 +19,23 @@ def test_default_count_vectorizer():
     sorted_count_matrix = utils.get_sorted_english_count_matrix()
 
     vectorizer = KeyphraseCountVectorizer()
+    vectorizer.fit(english_docs)
+    keyphrases = vectorizer.get_feature_names_out()
+    document_keyphrase_matrix = vectorizer.transform(english_docs).toarray()
+
+    assert [sorted(count_list) for count_list in
+            KeyphraseCountVectorizer().fit_transform(english_docs).toarray()] == sorted_count_matrix
+    assert [sorted(count_list) for count_list in document_keyphrase_matrix] == sorted_count_matrix
+    assert sorted(keyphrases) == sorted_english_test_keyphrases
+
+
+def test_spacy_language_argument():
+    sorted_english_test_keyphrases = utils.get_english_test_keyphrases()
+    sorted_count_matrix = utils.get_sorted_english_count_matrix()
+
+    nlp = spacy.load("en_core_web_sm")
+
+    vectorizer = KeyphraseCountVectorizer(spacy_pipeline=nlp)
     vectorizer.fit(english_docs)
     keyphrases = vectorizer.get_feature_names_out()
     document_keyphrase_matrix = vectorizer.transform(english_docs).toarray()
