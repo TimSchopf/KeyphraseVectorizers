@@ -48,9 +48,10 @@ Table of Contents
       1. [English language](#english-language)
       2. [Other languages](#other-languages)
    2. [KeyphraseTfidfVectorizer](#keyphrasetfidfvectorizer)
-   3. [Custom POS-tagger](#custom-pos-tagger)
-   4. [PatternRank: Keyphrase extraction with KeyphraseVectorizers and KeyBERT](#patternrank-keyphrase-extraction-with-keyphrasevectorizers-and-keybert)
-   5. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
+   3. [Reuse a spaCy Language object](#reuse-a-spacy-language-object)
+   4. [Custom POS-tagger](#custom-pos-tagger)
+   5. [PatternRank: Keyphrase extraction with KeyphraseVectorizers and KeyBERT](#patternrank-keyphrase-extraction-with-keyphrasevectorizers-and-keybert)
+   6. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
 4. [Citation information](#citation-information)
 
 <!--te-->
@@ -288,6 +289,48 @@ print(keyphrases)
  'training data' 'example' 'optimal scenario' 'information retrieval'
  'output' 'groups' 'indication' 'unseen instances' 'keywords' 'way'
  'phrases' 'overlap' 'users' 'learning algorithm' 'document']
+```
+
+<a name="#reuse-a-spacy-language-object"/></a>
+
+### Reuse a spaCy Language object
+
+[Back to Table of Contents](#toc)
+
+KeyphraseVectorizers loads a `spacy.Language` object for every `KeyphraseVectorizer` object.
+When using multiple `KeyphraseVectorizer` objects, it is more efficient to load the `spacy.Language` object beforehand and pass it as the `spacy_pipeline` argument.
+
+```python
+import spacy
+from keyphrase_vectorizers import KeyphraseCountVectorizer, KeyphraseTfidfVectorizer
+
+docs = ["""Supervised learning is the machine learning task of learning a function that
+         maps an input to an output based on example input-output pairs. It infers a
+         function from labeled training data consisting of a set of training examples.
+         In supervised learning, each example is a pair consisting of an input object
+         (typically a vector) and a desired output value (also called the supervisory signal). 
+         A supervised learning algorithm analyzes the training data and produces an inferred function, 
+         which can be used for mapping new examples. An optimal scenario will allow for the 
+         algorithm to correctly determine the class labels for unseen instances. This requires 
+         the learning algorithm to generalize from the training data to unseen situations in a 
+         'reasonable' way (see inductive bias).""", 
+             
+        """Keywords are defined as phrases that capture the main topics discussed in a document. 
+        As they offer a brief yet precise summary of document content, they can be utilized for various applications. 
+        In an information retrieval environment, they serve as an indication of document relevance for users, as the list 
+        of keywords can quickly help to determine whether a given document is relevant to their interest. 
+        As keywords reflect a document's main topics, they can be utilized to classify documents into groups 
+        by measuring the overlap between the keywords assigned to them. Keywords are also used proactively 
+        in information retrieval."""]
+
+nlp = spacy.load("en_core_web_sm")
+
+vectorizer1 = KeyphraseCountVectorizer(spacy_pipeline=nlp)
+vectorizer2 = KeyphraseTfidfVectorizer(spacy_pipeline=nlp)
+
+# the following calls use the nlp object
+vectorizer1.fit(docs)
+vectorizer2.fit(docs)
 ```
 
 <a name="##custom-pos-tagger"/></a>
