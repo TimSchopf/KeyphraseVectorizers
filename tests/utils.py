@@ -46,10 +46,10 @@ def get_english_test_keyphrases():
     sorted_english_test_keyphrases = ['algorithm', 'class labels', 'document', 'document content', 'document relevance',
                                       'documents', 'example', 'example input', 'function', 'groups', 'indication',
                                       'inductive bias', 'information retrieval', 'information retrieval environment',
-                                      'input', 'input object', 'interest', 'keywords', 'learning', 'learning algorithm',
-                                      'list', 'machine', 'main topics', 'new examples', 'optimal scenario', 'output',
-                                      'output pairs', 'output value', 'overlap', 'pair', 'phrases', 'precise summary',
-                                      'set', 'supervised learning', 'supervisory signal', 'task', 'training data',
+                                      'input', 'input object', 'interest', 'keywords', 'list', 'machine', 'main topics',
+                                      'new examples', 'optimal scenario', 'output', 'output pairs', 'output value',
+                                      'overlap', 'pair', 'phrases', 'precise summary', 'set', 'supervised learning',
+                                      'supervised learning algorithm', 'supervisory signal', 'task', 'training data',
                                       'training examples', 'unseen instances', 'unseen situations', 'users',
                                       'various applications', 'vector', 'way']
 
@@ -97,10 +97,10 @@ def get_french_test_keyphrases():
 
 def get_sorted_english_count_matrix():
     sorted_english_count_matrix = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2,
-         3, 3, 3, 3, 3, 3, 6],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-         1, 1, 1, 2, 2, 5, 5]]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+         3, 3, 3, 3, 3, 3],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 2, 2, 5, 5]]
 
     return sorted_english_count_matrix
 
@@ -113,13 +113,13 @@ def get_sorted_french_count_matrix():
 
 def get_sorted_english_tfidf_matrix():
     sorted_english_tfidf_matrix = [
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0928476691,
-         0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691,
-         0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691, 0.0928476691,
-         0.0928476691, 0.1856953382, 0.1856953382, 0.2785430073, 0.2785430073, 0.2785430073, 0.2785430073, 0.2785430073,
-         0.2785430073, 0.5570860145],
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1139605765,
+         0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765,
+         0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765,
+         0.1139605765, 0.1139605765, 0.2279211529, 0.3418817294, 0.3418817294, 0.3418817294, 0.3418817294, 0.3418817294,
+         0.3418817294],
         [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-         0.0, 0.0, 0.0, 0.0, 0.0, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658,
+         0.0, 0.0, 0.0, 0.0, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658,
          0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.2373563316,
          0.2373563316, 0.5933908291, 0.5933908291]]
 
@@ -128,8 +128,8 @@ def get_sorted_english_tfidf_matrix():
 
 def get_english_keybert_keyphrases():
     english_keybert_keyphrases = [
-        ['training examples', 'learning', 'training data', 'learning algorithm', 'supervised learning'],
-        ['document content', 'information retrieval environment', 'information retrieval', 'keywords',
-         'document relevance']]
+        ['supervised learning algorithm', 'supervised learning', 'training data', 'training examples', 'class labels'],
+        ['document relevance', 'keywords', 'information retrieval', 'information retrieval environment',
+         'document content']]
 
     return english_keybert_keyphrases
