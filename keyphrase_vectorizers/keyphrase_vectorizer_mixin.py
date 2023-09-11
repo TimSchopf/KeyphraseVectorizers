@@ -372,35 +372,14 @@ class _KeyphraseVectorizerMixin():
             nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
         cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
-<<<<<<< HEAD
-        for tagged_doc in nlp.pipe(document_list, n_process=workers):  
-            if use_lemmatizer:
-                self.lemmatized_documents.append(' '.join([d.lemma_ for d in tagged_doc]))
-                pos_tuples = [(d.lemma_, d.pos_) for d in tagged_doc]
-            else:
-                pos_tuples = [(d.text, d.pos_) for d in tagged_doc]
-
-            output = cp.parse(pos_tuples)
-            sequences = []
-            for subtree in output.subtrees(filter=lambda t: t.label() == 'CHUNK'):
-                keyphrase = ' '.join([i[0] for i in subtree.leaves()])
-                
-                # convert keyphrase to lowercase
-                if lowercase:
-                    keyphrase = keyphrase.lower()
-
-                keyphrase = keyphrase.strip()
-                
-                if keyphrase not in stop_words_list:
-                    sequences.append(keyphrase)
-            keyphrases_list.append(list(set(sequences)))
-
-        return list(set([keyphrase for sub_keyphrase_list in keyphrases_list for keyphrase in sub_keyphrase_list]))
-=======
         if not custom_pos_tagger:
             pos_tuples = []
             for tagged_doc in nlp.pipe(document_list, n_process=workers):
-                pos_tuples.extend([(word.text, word.tag_) for word in tagged_doc])
+                if use_lemmatizer:
+                    self.lemmatized_documents.append(' '.join([d.lemma_ for d in tagged_doc]))
+                    pos_tuples = [(d.lemma_, d.pos_) for d in tagged_doc]
+                else:
+                    pos_tuples.extend([(word.text, word.tag_) for word in tagged_doc])
         else:
             pos_tuples = custom_pos_tagger(raw_documents=document_list)
 
@@ -434,4 +413,3 @@ class _KeyphraseVectorizerMixin():
         keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
 
         return list(set(keyphrases))
->>>>>>> a20de034b05a78c53be221f8cf95bc8ef9799d98

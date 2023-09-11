@@ -135,21 +135,13 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     """
 
-<<<<<<< HEAD
-    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
-                 stop_words: str = 'english',
-                 lowercase: bool = True, 
-                 use_lemmatizer: bool = False,
-                 workers: int = 1, max_df: int = None, min_df: int = None,
-                 binary: bool = False,
-                 dtype: np.dtype = np.float64, norm: str = "l2",
-=======
     def __init__(self, spacy_pipeline: Union[str, spacy.Language] = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: Union[str, List[str]] = 'english',
-                 lowercase: bool = True, workers: int = 1, spacy_exclude: List[str] = None,
+                 lowercase: bool = True,
+                 use_lemmatizer: bool = False,
+                 workers: int = 1, spacy_exclude: List[str] = None,
                  custom_pos_tagger: callable = None, max_df: int = None, min_df: int = None,
                  binary: bool = False, dtype: np.dtype = np.float64, norm: str = "l2",
->>>>>>> a20de034b05a78c53be221f8cf95bc8ef9799d98
                  use_idf: bool = True, smooth_idf: bool = True,
                  sublinear_tf: bool = False):
 
@@ -186,15 +178,9 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                                        sublinear_tf=self.sublinear_tf)
 
         super().__init__(spacy_pipeline=self.spacy_pipeline, pos_pattern=self.pos_pattern, stop_words=self.stop_words,
-<<<<<<< HEAD
-                         lowercase=self.lowercase, use_lemmatizer=self.use_lemmatizer, workers=self.workers, max_df=self.max_df,
-                         min_df=self.min_df, binary=self.binary,
-                         dtype=self.dtype)
-=======
-                         lowercase=self.lowercase, workers=self.workers, spacy_exclude=self.spacy_exclude,
-                         custom_pos_tagger=self.custom_pos_tagger, max_df=self.max_df, min_df=self.min_df,
-                         binary=self.binary, dtype=self.dtype)
->>>>>>> a20de034b05a78c53be221f8cf95bc8ef9799d98
+                         lowercase=self.lowercase, use_lemmatizer=self.use_lemmatizer, workers=self.workers,
+                         spacy_exclude=self.spacy_exclude, custom_pos_tagger=self.custom_pos_tagger,
+                         max_df=self.max_df, min_df=self.min_df, binary=self.binary, dtype=self.dtype)
 
     def _check_params(self):
         """
