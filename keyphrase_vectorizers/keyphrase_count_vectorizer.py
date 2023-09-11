@@ -4,13 +4,15 @@
 .. _POS-tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 .. _regex pattern: https://docs.python.org/3/library/re.html#regular-expression-syntax
 .. _spaCy part-of-speech tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
+.. _spaCy pipeline components: https://spacy.io/usage/processing-pipelines#built-in
 """
 
 import warnings
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import psutil
+import spacy
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 from sklearn.feature_extraction.text import CountVectorizer
@@ -38,17 +40,18 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
 
     Parameters
     ----------
-    spacy_pipeline : str, default='en_core_web_sm'
-            The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text. Standard is the 'en' pipeline.
+    spacy_pipeline : Union[str, spacy.Language], default='en_core_web_sm'
+            A spacy.Language object or the name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text. Standard is the 'en' pipeline.
 
     pos_pattern :  str, default='<J.*>*<N.*>+'
         The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
         Standard is to only select keyphrases that have 0 or more adjectives, followed by 1 or more nouns.
 
-    stop_words : str, default='english'
+    stop_words : Union[str, List[str]], default='english'
             Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
+            If given a list of custom stopwords, removes them instead.
 
     lowercase : bool, default=True
         Whether the returned keyphrases should be converted to lowercase.
@@ -59,10 +62,18 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
     workers :int, default=1
             How many workers to use for spaCy part-of-speech tagging.
             If set to -1, use all available worker threads of the machine.
-            spaCy uses the specified number of cores to tag documents with part-of-speech.
+            SpaCy uses the specified number of cores to tag documents with part-of-speech.
             Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
+
+    spacy_exclude : List[str], default=None
+            A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
+            Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
+
+    custom_pos_tagger: callable, default=None
+            A callable function which expects a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
+            If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
 
     max_df : int, default=None
         During fitting ignore keyphrases that have a document frequency strictly higher than the given threshold.
@@ -79,10 +90,10 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         Type of the matrix returned by fit_transform() or transform().
     """
 
-    def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+', pos_tagger: any = None,
-                 stop_words: str = 'english', lowercase: bool = True, use_lemmatizer: bool = False, workers: int = 1, max_df: int = None,
-                 min_df: int = None,
-                 binary: bool = False, dtype: np.dtype = np.int64):
+    def __init__(self, spacy_pipeline: Union[str, spacy.Language] = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
+                 stop_words: Union[str, List[str]] = 'english', lowercase: bool = True, use_lemmatizer: bool = False,
+                 workers: int = 1, spacy_exclude: List[str] = None, custom_pos_tagger: callable = None, max_df: int = None,
+                 min_df: int = None, binary: bool = False, dtype: np.dtype = np.int64):
 
         # triggers a parameter validation
         if not isinstance(min_df, int) and min_df is not None:
@@ -133,17 +144,17 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
 
         self.spacy_pipeline = spacy_pipeline
         self.pos_pattern = pos_pattern
-        self.pos_tagger = pos_tagger
         self.stop_words = stop_words
         self.lowercase = lowercase
         self.use_lemmatizer = use_lemmatizer
         self.workers = workers
+        self.spacy_exclude = spacy_exclude
+        self.custom_pos_tagger = custom_pos_tagger
         self.max_df = max_df
         self.min_df = min_df
         self.binary = binary
         self.dtype = dtype
 
-        super().__init__()
 
     def fit(self, raw_documents: List[str]) -> object:
         """
@@ -166,7 +177,9 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                                                    pos_pattern=self.pos_pattern,
                                                    lowercase=self.lowercase, 
                                                    use_lemmatizer=self.use_lemmatizer,
-                                                   workers=self.workers)
+                                                   workers=self.workers,                                      
+                                                   spacy_exclude=self.spacy_exclude,
+                                                   custom_pos_tagger=self.custom_pos_tagger)
 
         # remove keyphrases that have more than 8 words, as they are probably no real keyphrases
         # additionally this prevents memory issues during transformation to a document-keyphrase matrix

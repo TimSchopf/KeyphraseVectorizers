@@ -4,13 +4,15 @@
 .. _POS-tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 .. _regex pattern: https://docs.python.org/3/library/re.html#regular-expression-syntax
 .. _spaCy part-of-speech tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
+.. _spaCy pipeline components: https://spacy.io/usage/processing-pipelines#built-in
 """
 
 import warnings
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import psutil
+import spacy
 from sklearn.exceptions import NotFittedError
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.utils.validation import FLOAT_DTYPES
@@ -66,17 +68,18 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     Parameters
     ----------
-    spacy_pipeline : str, default='en_core_web_sm'
-            The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text. Standard is the 'en' pipeline.
+    spacy_pipeline : Union[str, spacy.Language], default='en_core_web_sm'
+            A spacy.Language object or the name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text. Standard is the 'en' pipeline.
 
     pos_pattern :  str, default='<J.*>*<N.*>+'
         The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
         Standard is to only select keyphrases that have 0 or more adjectives, followed by 1 or more nouns.
 
-    stop_words : str, default='english'
+    stop_words : Union[str, List[str]], default='english'
             Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
+            If given a list of custom stopwords, removes them instead.
 
     lowercase : bool, default=True
         Whether the returned keyphrases should be converted to lowercase.
@@ -87,10 +90,18 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
     workers :int, default=1
             How many workers to use for spaCy part-of-speech tagging.
             If set to -1, use all available worker threads of the machine.
-            spaCy uses the specified number of cores to tag documents with part-of-speech.
+            SpaCy uses the specified number of cores to tag documents with part-of-speech.
             Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
+
+    spacy_exclude : List[str], default=None
+            A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
+            Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
+
+    custom_pos_tagger: callable, default=None
+            A callable function which expects a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
+            If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
 
     max_df : int, default=None
         During fitting ignore keyphrases that have a document frequency strictly higher than the given threshold.
@@ -124,6 +135,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     """
 
+<<<<<<< HEAD
     def __init__(self, spacy_pipeline: str = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: str = 'english',
                  lowercase: bool = True, 
@@ -131,6 +143,13 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                  workers: int = 1, max_df: int = None, min_df: int = None,
                  binary: bool = False,
                  dtype: np.dtype = np.float64, norm: str = "l2",
+=======
+    def __init__(self, spacy_pipeline: Union[str, spacy.Language] = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
+                 stop_words: Union[str, List[str]] = 'english',
+                 lowercase: bool = True, workers: int = 1, spacy_exclude: List[str] = None,
+                 custom_pos_tagger: callable = None, max_df: int = None, min_df: int = None,
+                 binary: bool = False, dtype: np.dtype = np.float64, norm: str = "l2",
+>>>>>>> a20de034b05a78c53be221f8cf95bc8ef9799d98
                  use_idf: bool = True, smooth_idf: bool = True,
                  sublinear_tf: bool = False):
 
@@ -152,6 +171,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         self.lowercase = lowercase
         self.use_lemmatizer = use_lemmatizer
         self.workers = workers
+        self.spacy_exclude = spacy_exclude
+        self.custom_pos_tagger = custom_pos_tagger
         self.max_df = max_df
         self.min_df = min_df
         self.binary = binary
@@ -165,9 +186,15 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                                        sublinear_tf=self.sublinear_tf)
 
         super().__init__(spacy_pipeline=self.spacy_pipeline, pos_pattern=self.pos_pattern, stop_words=self.stop_words,
+<<<<<<< HEAD
                          lowercase=self.lowercase, use_lemmatizer=self.use_lemmatizer, workers=self.workers, max_df=self.max_df,
                          min_df=self.min_df, binary=self.binary,
                          dtype=self.dtype)
+=======
+                         lowercase=self.lowercase, workers=self.workers, spacy_exclude=self.spacy_exclude,
+                         custom_pos_tagger=self.custom_pos_tagger, max_df=self.max_df, min_df=self.min_df,
+                         binary=self.binary, dtype=self.dtype)
+>>>>>>> a20de034b05a78c53be221f8cf95bc8ef9799d98
 
     def _check_params(self):
         """

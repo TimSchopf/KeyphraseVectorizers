@@ -3,11 +3,12 @@
 .. _stopwords available in NLTK: https://github.com/nltk/nltk_data/blob/gh-pages/packages/corpora/stopwords.zip
 .. _POS-tags: https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 .. _regex pattern: https://docs.python.org/3/library/re.html#regular-expression-syntax
+.. _spaCy pipeline components: https://spacy.io/usage/processing-pipelines#built-in
 """
 
 import logging
 import os
-from typing import List
+from typing import List, Union
 
 import nltk
 import numpy as np
@@ -185,7 +186,8 @@ class _KeyphraseVectorizerMixin():
     def get_lemmatized_documents(self):
         return self.lemmatized_documents
 
-    def _get_pos_keyphrases(self, document_list: List[str], stop_words: str, spacy_pipeline: str, pos_pattern: str, pos_tagger: any = None,
+    def _get_pos_keyphrases(self, document_list: List[str], stop_words: Union[str, List[str]], spacy_pipeline: Union[str, spacy.Language],
+                            pos_pattern: str, spacy_exclude: List[str], custom_pos_tagger: callable,
                             lowercase: bool = True, use_lemmatizer: bool = False, workers: int = 1) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
@@ -194,16 +196,25 @@ class _KeyphraseVectorizerMixin():
         document_list : list of str
             List of text documents from which to extract the keyphrases.
 
-        stop_words : str
+        stop_words : Union[str, List[str]]
             Language of stopwords to remove from the document, e.g. 'english'.
             Supported options are `stopwords available in NLTK`_.
             Removes unwanted stopwords from keyphrases if 'stop_words' is not None.
+            If given a list of custom stopwords, removes them instead.
 
-        spacy_pipeline : str
-            The name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text.
+        spacy_pipeline : Union[str, spacy.Language]
+            A spacy.Language object or the name of the `spaCy pipeline`_, used to tag the parts-of-speech in the text.
 
         pos_pattern : str
             The `regex pattern`_ of `POS-tags`_ used to extract a sequence of POS-tagged tokens from the text.
+
+        spacy_exclude : List[str]
+            A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
+            Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
+
+    custom_pos_tagger: callable
+            A callable function which expects a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
+            If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
 
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.
@@ -237,15 +248,15 @@ class _KeyphraseVectorizerMixin():
             )
 
         # triggers a parameter validation
-        if not isinstance(stop_words, str):
+        if not isinstance(stop_words, str) and (stop_words is not None) and (not hasattr(stop_words, '__iter__')):
             raise ValueError(
-                "'stop_words' parameter needs to be a string. E.g. 'english'"
+                "'stop_words' parameter needs to be a string, e.g. 'english' or 'None' or a list of strings."
             )
 
         # triggers a parameter validation
-        if not isinstance(spacy_pipeline, str):
+        if not isinstance(spacy_pipeline, (str, spacy.Language)):
             raise ValueError(
-                "'spacy_pipeline' parameter needs to be a spaCy pipeline string. E.g. 'en_core_web_sm'"
+                "'spacy_pipeline' parameter needs to be a spacy.Language object or a spaCy pipeline string. E.g. 'en_core_web_sm'"
             )
 
         # triggers a parameter validation
@@ -258,12 +269,23 @@ class _KeyphraseVectorizerMixin():
         if not isinstance(use_lemmatizer, bool):
             raise ValueError(
                 "'use_lemmatizer' parameter must be of type bool"
+
+        if ((not hasattr(spacy_exclude, '__iter__')) and (spacy_exclude is not None)) or (
+                isinstance(spacy_exclude, str)):
+            raise ValueError(
+                "'spacy_exclude' parameter needs to be a list of 'spaCy pipeline components' strings."
+            )
+
+        # triggers a parameter validation
+        if not callable(custom_pos_tagger) and (custom_pos_tagger is not None):
+            raise ValueError(
+                "'custom_pos_tagger' must be a callable function that gets a list of strings in a 'raw_documents' parameter and returns a list of (word, POS-tag) tuples."
             )
 
         # triggers a parameter validation
         if not isinstance(workers, int):
             raise ValueError(
-                "'workers' parameter must be of type int"
+                "'workers' parameter must be of type int."
             )
 
         if (workers < -1) or (workers > psutil.cpu_count(logical=True)) or (workers == 0):
@@ -273,7 +295,7 @@ class _KeyphraseVectorizerMixin():
             )
 
         stop_words_list = []
-        if stop_words:
+        if isinstance(stop_words, str):
             try:
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
             except LookupError:
@@ -289,36 +311,46 @@ class _KeyphraseVectorizerMixin():
                 nltk.download('stopwords')
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
 
-        # add spaCy POS tags for documents
-        spacy_exclude = ['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
-                         'senter', 'sentencizer', 'tok2vec']
-        try:
-            nlp = spacy.load(spacy_pipeline,
-                             exclude=spacy_exclude)
+        elif hasattr(stop_words, '__iter__'):
+            stop_words_list = stop_words
 
-        except OSError:
-            # set logger
-            logger = logging.getLogger('KeyphraseVectorizer')
-            logger.setLevel(logging.WARNING)
-            sh = logging.StreamHandler()
-            sh.setFormatter(logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-            logger.addHandler(sh)
-            logger.setLevel(logging.DEBUG)
-            logger.info(
-                'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
-            spacy.cli.download(spacy_pipeline)
-            nlp = spacy.load(spacy_pipeline,
-                             exclude=spacy_exclude)
+
 
         if pos_tagger != None:
-          pos_tagger_component = Language.component("pos_tagger", func=pos_tagger)
-          nlp.add_pipe("pos_tagger", name="pos_tagger", first=True)
+          
 
-        if use_lemmatizer == False:
-            spacy_exclude.append("lemmatizer")
 
-        keyphrases_list = []
+        if not custom_pos_tagger:
+            if isinstance(spacy_pipeline, spacy.Language):
+                nlp = spacy_pipeline
+            else:
+                if not spacy_exclude:
+                    spacy_exclude = ['ner', 'entity_linker', 'entity_ruler', 'textcat', 'textcat_multilabel',
+                                     'senter', 'sentencizer', 'tok2vec']
+                try:
+                    if use_lemmatizer:
+                        spacy_exclude.append("lemmatizer")
+
+                    nlp = spacy.load(spacy_pipeline,
+                                     exclude=spacy_exclude)
+                except OSError:
+                    # set logger
+                    logger = logging.getLogger('KeyphraseVectorizer')
+                    logger.setLevel(logging.WARNING)
+                    sh = logging.StreamHandler()
+                    sh.setFormatter(logging.Formatter(
+                        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                    logger.addHandler(sh)
+                    logger.setLevel(logging.DEBUG)
+                    logger.info(
+                        'It looks like the selected spaCy pipeline is not downloaded yet. It is attempted to download the spaCy pipeline now.')
+                    spacy.cli.download(spacy_pipeline)
+                    nlp = spacy.load(spacy_pipeline,
+                                     exclude=spacy_exclude)
+
+                pos_tagger_component = Language.component("pos_tagger", func=pos_tagger)
+                nlp.add_pipe("pos_tagger", name="pos_tagger", first=True)
+
         if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -336,9 +368,11 @@ class _KeyphraseVectorizerMixin():
 
         # increase max length of documents that spaCy can parse
         # (should only be done if parser and ner are not used due to memory issues)
-        nlp.max_length = max([len(doc) for doc in document_list]) + 100
+        if not custom_pos_tagger:
+            nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
         cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
+<<<<<<< HEAD
         for tagged_doc in nlp.pipe(document_list, n_process=workers):  
             if use_lemmatizer:
                 self.lemmatized_documents.append(' '.join([d.lemma_ for d in tagged_doc]))
@@ -362,3 +396,42 @@ class _KeyphraseVectorizerMixin():
             keyphrases_list.append(list(set(sequences)))
 
         return list(set([keyphrase for sub_keyphrase_list in keyphrases_list for keyphrase in sub_keyphrase_list]))
+=======
+        if not custom_pos_tagger:
+            pos_tuples = []
+            for tagged_doc in nlp.pipe(document_list, n_process=workers):
+                pos_tuples.extend([(word.text, word.tag_) for word in tagged_doc])
+        else:
+            pos_tuples = custom_pos_tagger(raw_documents=document_list)
+
+        # extract keyphrases that match the NLTK RegexpParser filter
+        keyphrases = []
+        # prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
+        # suffix_list = [' ' + stop_word for stop_word in stop_words_list]
+        tree = cp.parse(pos_tuples)
+        for subtree in tree.subtrees(filter=lambda tuple: tuple.label() == 'CHUNK'):
+            # join candidate keyphrase from single words
+            keyphrase = ' '.join([i[0] for i in subtree.leaves()])
+
+            # convert keyphrase to lowercase
+            if lowercase:
+                keyphrase = keyphrase.lower()
+
+            # remove stopword suffixes
+            # keyphrase = self._remove_suffixes(keyphrase, suffix_list)
+
+            # remove stopword prefixes
+            # keyphrase = self._remove_prefixes(keyphrase, prefix_list)
+
+            # remove whitespace from the beginning and end of keyphrases
+            keyphrase = keyphrase.strip()
+
+            # do not include single keywords that are actually stopwords
+            if keyphrase.lower() not in stop_words_list:
+                keyphrases.append(keyphrase)
+
+        # remove potential empty keyphrases
+        keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
+
+        return list(set(keyphrases))
+>>>>>>> a20de034b05a78c53be221f8cf95bc8ef9799d98
