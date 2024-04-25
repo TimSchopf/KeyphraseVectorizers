@@ -92,7 +92,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
 
-    spacy_exclude : List[str], default=None
+    spacy_exclude : List[str], default=['parser', 'attribute_ruler', 'lemmatizer', 'ner']
             A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
             Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
@@ -134,7 +134,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
 
     def __init__(self, spacy_pipeline: Union[str, spacy.Language] = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: Union[str, List[str]] = 'english',
-                 lowercase: bool = True, workers: int = 1, spacy_exclude: List[str] = None,
+                 lowercase: bool = True, workers: int = 1,
+                 spacy_exclude: List[str] = ['parser', 'attribute_ruler', 'lemmatizer', 'ner'],
                  custom_pos_tagger: callable = None, max_df: int = None, min_df: int = None,
                  binary: bool = False, dtype: np.dtype = np.float64, norm: str = "l2",
                  use_idf: bool = True, smooth_idf: bool = True,

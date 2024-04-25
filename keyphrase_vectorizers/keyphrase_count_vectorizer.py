@@ -64,7 +64,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
 
-    spacy_exclude : List[str], default=None
+    spacy_exclude : List[str], default=['parser', 'attribute_ruler', 'lemmatizer', 'ner']
             A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
             Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
@@ -80,7 +80,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         This value is also called cut-off in the literature.
 
     binary : bool, default=False
-        If True, all non zero counts are set to 1.
+        If True, all non-zero counts are set to 1.
         This is useful for discrete probabilistic models that model binary events rather than integer counts.
 
     dtype : type, default=np.int64
@@ -89,7 +89,8 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
 
     def __init__(self, spacy_pipeline: Union[str, spacy.Language] = 'en_core_web_sm', pos_pattern: str = '<J.*>*<N.*>+',
                  stop_words: Union[str, List[str]] = 'english', lowercase: bool = True, workers: int = 1,
-                 spacy_exclude: List[str] = None, custom_pos_tagger: callable = None,
+                 spacy_exclude: List[str] = ['parser', 'attribute_ruler', 'lemmatizer', 'ner'],
+                 custom_pos_tagger: callable = None,
                  max_df: int = None, min_df: int = None, binary: bool = False, dtype: np.dtype = np.int64):
 
         # triggers a parameter validation
@@ -144,6 +145,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.min_df = min_df
         self.binary = binary
         self.dtype = dtype
+        self.running_fit_transform = False
 
     def fit(self, raw_documents: List[str]) -> object:
         """
@@ -160,13 +162,18 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             Fitted vectorizer.
         """
 
-        self.keyphrases = self._get_pos_keyphrases(document_list=raw_documents,
+        processed_documents, self.keyphrases = self._get_pos_keyphrases(document_list=raw_documents,
                                                    stop_words=self.stop_words,
                                                    spacy_pipeline=self.spacy_pipeline,
                                                    pos_pattern=self.pos_pattern,
                                                    lowercase=self.lowercase, workers=self.workers,
                                                    spacy_exclude=self.spacy_exclude,
-                                                   custom_pos_tagger=self.custom_pos_tagger)
+                                                                        custom_pos_tagger=self.custom_pos_tagger,
+                                                                        extract_keyphrases=True)
+
+        # if the fit_transform process is currently running, pass the processed documents, so they do not need to be tokenized again
+        if self.running_fit_transform:
+            self.processed_documents = processed_documents
 
         # remove keyphrases that have more than 8 words, as they are probably no real keyphrases
         # additionally this prevents memory issues during transformation to a document-keyphrase matrix
@@ -178,8 +185,8 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
                 min([len(keyphrase.split()) for keyphrase in self.keyphrases]),
                 max([len(keyphrase.split()) for keyphrase in self.keyphrases])),
                                                         lowercase=self.lowercase, binary=self.binary,
-                                                        dtype=self.dtype).transform(
-                raw_documents=raw_documents).toarray()
+                                                        dtype=self.dtype, tokenizer=self._tokenize).transform(
+                raw_documents=self.processed_documents).toarray()
 
             document_frequencies = self._document_frequency(document_keyphrase_counts)
 
@@ -197,7 +204,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
             self.min_n_gram_length = min([len(keyphrase.split()) for keyphrase in self.keyphrases])
         else:
             raise ValueError(
-                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' parameter, only contain stop words, or you set the 'min_df'/'max_df' parameters too strict.")
+                "Empty keyphrases. Perhaps the documents do not contain keyphrases that match the 'pos_pattern' argument, only contain stop words, or you set the 'min_df'/'max_df' arguments too strict.")
 
         return self
 
@@ -217,14 +224,23 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         X : array of shape (n_samples, n_features)
             Document-keyphrase matrix.
         """
+        # indicate if the fit_transform process is currently running
+        self.running_fit_transform = True
 
         # fit
         KeyphraseCountVectorizer.fit(self=self, raw_documents=raw_documents)
 
         # transform
-        return CountVectorizer(vocabulary=self.keyphrases, ngram_range=(self.min_n_gram_length, self.max_n_gram_length),
-                               lowercase=self.lowercase, binary=self.binary, dtype=self.dtype).fit_transform(
-            raw_documents=raw_documents)
+        count_matrix = CountVectorizer(vocabulary=self.keyphrases,
+                                       ngram_range=(self.min_n_gram_length, self.max_n_gram_length),
+                                       lowercase=self.lowercase, binary=self.binary, dtype=self.dtype,
+                                       tokenizer=self._tokenize).fit_transform(
+            raw_documents=self.processed_documents)
+
+        del self.processed_documents
+        self.running_fit_transform = False
+
+        return count_matrix
 
     def transform(self, raw_documents: List[str]) -> List[List[int]]:
         """
@@ -247,9 +263,20 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         if not hasattr(self, 'keyphrases'):
             raise NotFittedError("Keyphrases not fitted.")
 
+        processed_documents, _ = self._get_pos_keyphrases(document_list=raw_documents,
+                                                          stop_words=self.stop_words,
+                                                          spacy_pipeline=self.spacy_pipeline,
+                                                          pos_pattern=self.pos_pattern,
+                                                          lowercase=self.lowercase, workers=self.workers,
+                                                          spacy_exclude=['tok2vec', 'tagger', 'parser',
+                                                                         'attribute_ruler', 'lemmatizer', 'ner'],
+                                                          custom_pos_tagger=self.custom_pos_tagger,
+                                                          extract_keyphrases=False)
+
         return CountVectorizer(vocabulary=self.keyphrases, ngram_range=(self.min_n_gram_length, self.max_n_gram_length),
-                               lowercase=self.lowercase, binary=self.binary, dtype=self.dtype).transform(
-            raw_documents=raw_documents)
+                               lowercase=self.lowercase, binary=self.binary, dtype=self.dtype,
+                               tokenizer=self._tokenize).transform(
+            raw_documents=processed_documents)
 
     def inverse_transform(self, X: List[List[int]]) -> List[List[str]]:
         """
@@ -272,6 +299,11 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
 
         return CountVectorizer(vocabulary=self.keyphrases, ngram_range=(self.min_n_gram_length, self.max_n_gram_length),
                                lowercase=self.lowercase, binary=self.binary, dtype=self.dtype).inverse_transform(X=X)
+
+    # custom tokenizer for sklearn vectorizer that doesn't remove punctuation
+    def _tokenize(self, text):
+        tokens = text.split()
+        return tokens
 
     @deprecated(
         "get_feature_names() is deprecated in scikit-learn 1.0 and will be removed "

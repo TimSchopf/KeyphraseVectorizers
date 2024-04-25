@@ -126,12 +126,15 @@ vectorizer = KeyphraseCountVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->>> {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_exclude': None, 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'workers': 1}
+>>> {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_exclude': ['parser', 'attribute_ruler', 'lemmatizer', 'ner'], 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'workers': 1}
 ```
 
 By default, the vectorizer is initialized for the English language. That means, an English `spacy_pipeline` is
 specified, English `stop_words` are removed, and the `pos_pattern` extracts keywords that have 0 or more adjectives,
-followed by 1 or more nouns using the English spaCy part-of-speech tags.
+followed by 1 or more nouns using the English spaCy part-of-speech tags. In addition, the spaCy pipeline
+components `['parser', 'attribute_ruler', 'lemmatizer', 'ner']` are excluded by default to increase efficiency. If you
+choose a different `spacy_pipeline`, you may have to exclude/include different pipeline components for the spaCy POS
+tagger to work properly.
 
 ```python
 # After initializing the vectorizer, it can be fitted
@@ -208,6 +211,10 @@ The German `spacy_pipeline` is specified and German `stop_words` are removed. Be
 tags differ from the English ones, the `pos_pattern` parameter is also customized. The regex pattern `<ADJ.*>*<N.*>+`
 extracts keywords that have 0 or more adjectives, followed by 1 or more nouns using the German spaCy part-of-speech
 tags.
+
+**Attention!** The spaCy pipeline components `['parser', 'attribute_ruler', 'lemmatizer', 'ner']` are excluded by
+default to increase efficiency. If you choose a different `spacy_pipeline`, you may have to exclude/include different
+pipeline components for the spaCy POS tagger to work properly.
 
 <a name="#keyphrasetfidfvectorizer"/></a>
 

@@ -99,42 +99,45 @@ class _KeyphraseVectorizerMixin():
             List of strings to join.
 
         max_text_length : int
-            Maximun character length of the joined strings.
+            Maximum character length of the joined strings.
 
         Returns
         -------
-        list_of_joined_srings_with_max_length : List of joined text strings with max char length of 'max_text_length.
+        list_of_joined_strings_with_max_length : List of joined text strings with max char length of 'max_text_length'.
         """
 
-        # triggers a parameter validation
         if isinstance(text_list, str):
-            raise ValueError(
-                "Iterable over raw texts expected, string object received."
-            )
+            raise ValueError("Iterable over raw texts expected, string object received.")
 
-        # triggers a parameter validation
-        if not hasattr(text_list, '__iter__'):
-            raise ValueError(
-                "Iterable over texts expected."
-            )
+        if not isinstance(max_text_length, int) or max_text_length <= 0:
+            raise ValueError("max_text_length must be a positive integer.")
 
-        text_list_len = len(text_list) - 1
-        list_of_joined_srings_with_max_length = []
-        one_string = ''
-        for index, text in enumerate(text_list):
-            # Add the text to the substring if it doesn't make it to large
-            if len(one_string) + len(text) < max_text_length:
-                one_string += ' ' + text
-                if index == text_list_len:
-                    list_of_joined_srings_with_max_length.append(one_string)
+        joined_strings = []
+        current_string = ""
 
-            # Substring too large, so add to the list and reset
+        for text in text_list:
+            if not text:
+                continue
+
+            # If the next text exceeds the max length, start a new string
+            if len(current_string) + len(text) + 1 > max_text_length:  # +1 for space character
+                # Append the current string to the result list
+                if current_string:
+                    joined_strings.append(current_string.strip())
+                # Start a new string with the current text
+                current_string = text
             else:
-                list_of_joined_srings_with_max_length.append(one_string)
-                one_string = text
-                if index == text_list_len:
-                    list_of_joined_srings_with_max_length.append(one_string)
-        return list_of_joined_srings_with_max_length
+                # Add the text to the current string
+                if current_string:
+                    current_string += ' ' + text
+                else:
+                    current_string = text
+
+        # Append the last string to the result list
+        if current_string:
+            joined_strings.append(current_string.strip())
+
+        return joined_strings
 
     def _split_long_document(self, text: str, max_text_length: int) -> List[str]:
         """
@@ -146,7 +149,7 @@ class _KeyphraseVectorizerMixin():
             Text string that should be split.
 
         max_text_length : int
-            Maximun character length of the strings.
+            Maximum character length of the strings.
 
         Returns
         -------
@@ -166,15 +169,16 @@ class _KeyphraseVectorizerMixin():
 
         text = text.replace("? ", "?<stop>")
         text = text.replace("! ", "!<stop>")
+
         if "<stop>" in text:
             splitted_document = text.split("<stop>")
-            splitted_document = splitted_document[:-1]
-            splitted_document = [s.strip() for s in splitted_document]
+            splitted_document = [s.strip() for s in splitted_document if s.strip()]  # Filter out empty strings
             splitted_document = [
                 self._cumulative_length_joiner(text_list=doc.split(" "), max_text_length=max_text_length) if len(
                     doc) > max_text_length else [doc] for doc in splitted_document]
             return [text for doc in splitted_document for text in doc]
         else:
+            # No punctuation marks found, process the entire text
             splitted_document = text.split(" ")
             splitted_document = self._cumulative_length_joiner(text_list=splitted_document,
                                                                max_text_length=max_text_length)
@@ -182,7 +186,7 @@ class _KeyphraseVectorizerMixin():
 
     def _get_pos_keyphrases(self, document_list: List[str], stop_words: Union[str, List[str]], spacy_pipeline: Union[str, spacy.Language],
                             pos_pattern: str, spacy_exclude: List[str], custom_pos_tagger: callable,
-                            lowercase: bool = True, workers: int = 1) -> List[str]:
+                            lowercase: bool = True, workers: int = 1, extract_keyphrases: bool = True) -> List[str]:
         """
         Select keyphrases with part-of-speech tagging from a text document.
         Parameters
@@ -206,20 +210,23 @@ class _KeyphraseVectorizerMixin():
             A list of `spaCy pipeline components`_ that should be excluded during the POS-tagging.
             Removing not needed pipeline components can sometimes make a big difference and improve loading and inference speed.
 
-    custom_pos_tagger: callable
+        custom_pos_tagger : callable
             A callable function which expects a list of strings in a 'raw_documents' parameter and returns a list of (word token, POS-tag) tuples.
             If this parameter is not None, the custom tagger function is used to tag words with parts-of-speech, while the spaCy pipeline is ignored.
 
         lowercase : bool, default=True
             Whether the returned keyphrases should be converted to lowercase.
 
-        workers :int, default=1
+        workers : int, default=1
             How many workers to use for spaCy part-of-speech tagging.
             If set to -1, use all available worker threads of the machine.
             spaCy uses the specified number of cores to tag documents with part-of-speech.
             Depending on the platform, starting many processes with multiprocessing can add a lot of overhead.
             In particular, the default start method spawn used in macOS/OS X (as of Python 3.8) and in Windows can be slow.
             Therefore, carefully consider whether this option is really necessary.
+
+        extract_keyphrases : bool, default=True
+            Whether to run the keyphrase extraction step or just return an empty list.
 
         Returns
         -------
@@ -310,8 +317,12 @@ class _KeyphraseVectorizerMixin():
                 if not spacy_exclude:
                     spacy_exclude = []
                 try:
-                    nlp = spacy.load(spacy_pipeline,
-                                     exclude=spacy_exclude)
+                    if extract_keyphrases:
+                        nlp = spacy.load(spacy_pipeline, exclude=spacy_exclude)
+                    else:
+                        # only use tokenizer if no keywords are extracted
+                        nlp = spacy.blank(spacy_pipeline.split("_")[0])
+
                 except OSError:
                     # set logger
                     logger = logging.getLogger('KeyphraseVectorizer')
@@ -330,10 +341,14 @@ class _KeyphraseVectorizerMixin():
         if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-        # split large documents in smaller chunks, so that spacy can process them without memory issues
+        # add document delimiter so we can identify the original document split later
+        doc_delimiter = "|||document_delimiter|||"
+        document_list = [doc_delimiter + " " + doc for doc in document_list]
+
+        # split large documents in smaller chunks, so that spaCy can process them without memory issues
         docs_list = []
         # set maximal character length of documents for spaCy processing
-        max_doc_length = 1000000
+        max_doc_length = 500
         for document in document_list:
             if len(document) > max_doc_length:
                 docs_list.extend(self._split_long_document(text=document, max_text_length=max_doc_length))
@@ -347,41 +362,49 @@ class _KeyphraseVectorizerMixin():
         if not custom_pos_tagger:
             nlp.max_length = max([len(doc) for doc in document_list]) + 100
 
-        cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
         if not custom_pos_tagger:
             pos_tuples = []
             for tagged_doc in nlp.pipe(document_list, n_process=workers):
-                pos_tuples.extend([(word.text, word.tag_) for word in tagged_doc])
+                pos_tuples.extend([(word.text, word.tag_) for word in tagged_doc if word.text])
         else:
             pos_tuples = custom_pos_tagger(raw_documents=document_list)
 
-        # extract keyphrases that match the NLTK RegexpParser filter
-        keyphrases = []
-        # prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
-        # suffix_list = [' ' + stop_word for stop_word in stop_words_list]
-        tree = cp.parse(pos_tuples)
-        for subtree in tree.subtrees(filter=lambda tuple: tuple.label() == 'CHUNK'):
-            # join candidate keyphrase from single words
-            keyphrase = ' '.join([i[0] for i in subtree.leaves()])
+        # get the original documents after they were processed by spaCy
+        processed_docs = ' '.join([tup[0].lower() if lowercase else tup[0] for tup in pos_tuples])
+        processed_docs = list(filter(None, [doc.strip() for doc in processed_docs.split(doc_delimiter)]))
 
-            # convert keyphrase to lowercase
-            if lowercase:
-                keyphrase = keyphrase.lower()
+        if extract_keyphrases:
+            # extract keyphrases that match the NLTK RegexpParser filter
+            keyphrases = []
+            # prefix_list = [stop_word + ' ' for stop_word in stop_words_list]
+            # suffix_list = [' ' + stop_word for stop_word in stop_words_list]
+            cp = nltk.RegexpParser('CHUNK: {(' + pos_pattern + ')}')
+            tree = cp.parse(pos_tuples)
+            for subtree in tree.subtrees(filter=lambda tuple: tuple.label() == 'CHUNK'):
+                # join candidate keyphrase from single words
+                keyphrase = ' '.join([i[0] for i in subtree.leaves() if i[0] != doc_delimiter])
 
-            # remove stopword suffixes
-            # keyphrase = self._remove_suffixes(keyphrase, suffix_list)
+                # convert keyphrase to lowercase
+                if lowercase:
+                    keyphrase = keyphrase.lower()
 
-            # remove stopword prefixes
-            # keyphrase = self._remove_prefixes(keyphrase, prefix_list)
+                # remove stopword suffixes
+                # keyphrase = self._remove_suffixes(keyphrase, suffix_list)
 
-            # remove whitespace from the beginning and end of keyphrases
-            keyphrase = keyphrase.strip()
+                # remove stopword prefixes
+                # keyphrase = self._remove_prefixes(keyphrase, prefix_list)
 
-            # do not include single keywords that are actually stopwords
-            if keyphrase.lower() not in stop_words_list:
-                keyphrases.append(keyphrase)
+                # remove whitespace from the beginning and end of keyphrases
+                keyphrase = keyphrase.strip()
 
-        # remove potential empty keyphrases
-        keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
+                # do not include single keywords that are actually stopwords
+                if keyphrase.lower() not in stop_words_list:
+                    keyphrases.append(keyphrase)
 
-        return list(set(keyphrases))
+            # remove potential empty keyphrases
+            keyphrases = [keyphrase for keyphrase in keyphrases if keyphrase != '']
+
+        else:
+            keyphrases = []
+
+        return processed_docs, list(set(keyphrases))
