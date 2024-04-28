@@ -44,9 +44,9 @@ def get_french_docs():
 
 def get_english_test_keyphrases():
     sorted_english_test_keyphrases = ['algorithm', 'class labels', 'document', 'document content', 'document relevance',
-                                      'documents', 'example', 'example input', 'function', 'groups', 'indication',
-                                      'inductive bias', 'information retrieval', 'information retrieval environment',
-                                      'input', 'input object', 'interest', 'keywords', 'list', 'machine', 'main topics',
+                                      'documents', 'example', 'function', 'groups', 'indication', 'inductive bias',
+                                      'information retrieval', 'information retrieval environment', 'input',
+                                      'input object', 'interest', 'keywords', 'list', 'machine', 'main topics',
                                       'new examples', 'optimal scenario', 'output', 'output pairs', 'output value',
                                       'overlap', 'pair', 'phrases', 'precise summary', 'set', 'supervised learning',
                                       'supervised learning algorithm', 'supervisory signal', 'task', 'training data',
@@ -76,16 +76,13 @@ def get_sorted_english_keyphrases_custom_flair_tagger():
 
 def get_german_test_keyphrases():
     sorted_german_test_keyphrases = ['advokat', 'angesehenen bürgerlichen familie', 'ausbildung', 'bäckers',
-                                     'dichtkunst',
-                                     'ehefrau elisabetha dorothea schiller', 'frankfurt', 'friedrich schiller',
-                                     'geb. kodweiß',
-                                     'goethe', 'großvater', 'hauslehrer', 'hofgärtnerei', 'höchster justizbeamter',
-                                     'kaiserlicher rat', 'leipzig', 'leiters', 'marbach', 'neckar',
-                                     'neckar johann kaspar schiller', 'neigung', 'offiziers', 'rechte',
-                                     'rechtswissenschaft',
-                                     'schwester cornelia', 'stadt frankfurt', 'stadtschultheiß', 'straßburg', 'tochter',
-                                     'vater doktor', 'vaters', 'wetzlar', 'wirtes', 'wundarztes', 'wunsch',
-                                     'zweites kind']
+                                     'dichtkunst', 'ehefrau elisabetha dorothea schiller', 'frankfurt',
+                                     'friedrich schiller', 'geb. kodweiß', 'goethe', 'großvater', 'hauslehrer',
+                                     'hofgärtnerei', 'höchster justizbeamter', 'kaiserlicher rat', 'leipzig', 'leiters',
+                                     'marbach', 'neckar', 'neckar johann kaspar schiller', 'neigung', 'offiziers',
+                                     'rechte', 'rechtswissenschaft', 'schwester cornelia', 'stadt frankfurt',
+                                     'stadtschultheiß', 'straßburg', 'tochter', 'vater doktor', 'vaters', 'wetzlar',
+                                     'wirtes', 'wundarztes', 'wunsch', 'zweites kind']
     return sorted_german_test_keyphrases
 
 
@@ -97,29 +94,29 @@ def get_french_test_keyphrases():
 
 def get_sorted_english_count_matrix():
     sorted_english_count_matrix = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-         3, 3, 3, 3, 3, 3],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-         1, 1, 2, 2, 5, 5]]
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
+         3, 3, 3, 3, 3],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 2, 2, 5, 5]]
 
     return sorted_english_count_matrix
 
 
 def get_sorted_french_count_matrix():
-    sorted_french_coun_matrix = [[1, 1, 1, 1]]
+    sorted_french_count_matrix = [[1, 1, 1, 1]]
 
-    return sorted_french_coun_matrix
+    return sorted_french_count_matrix
 
 
 def get_sorted_english_tfidf_matrix():
     sorted_english_tfidf_matrix = [
-        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1139605765,
-         0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765,
-         0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765, 0.1139605765,
-         0.1139605765, 0.1139605765, 0.2279211529, 0.3418817294, 0.3418817294, 0.3418817294, 0.3418817294, 0.3418817294,
-         0.3418817294],
+        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1147078669,
+         0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669,
+         0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669, 0.1147078669,
+         0.1147078669, 0.2294157339, 0.3441236008, 0.3441236008, 0.3441236008, 0.3441236008, 0.3441236008,
+         0.3441236008],
         [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-         0.0, 0.0, 0.0, 0.0, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658,
+         0.0, 0.0, 0.0, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658,
          0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.1186781658, 0.2373563316,
          0.2373563316, 0.5933908291, 0.5933908291]]
 

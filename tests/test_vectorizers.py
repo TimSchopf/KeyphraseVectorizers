@@ -83,13 +83,13 @@ def test_french_trf_spacy_pipeline():
     sorted_french_test_keyphrases = utils.get_french_test_keyphrases()
     sorted_french_count_matrix = utils.get_sorted_french_count_matrix()
 
-    vectorizer = KeyphraseCountVectorizer(spacy_pipeline='fr_dep_news_trf')
+    vectorizer = KeyphraseCountVectorizer(spacy_pipeline='fr_dep_news_trf', spacy_exclude=[])
     vectorizer.fit(french_docs)
     keyphrases = vectorizer.get_feature_names_out()
     document_keyphrase_matrix = vectorizer.transform(french_docs).toarray()
 
     assert [sorted(count_list) for count_list in
-            KeyphraseCountVectorizer(spacy_pipeline='fr_dep_news_trf').fit_transform(
+            KeyphraseCountVectorizer(spacy_pipeline='fr_dep_news_trf', spacy_exclude=[]).fit_transform(
                 french_docs).toarray()] == sorted_french_count_matrix
     assert [sorted(count_list) for count_list in document_keyphrase_matrix] == sorted_french_count_matrix
     assert sorted(keyphrases) == sorted_french_test_keyphrases

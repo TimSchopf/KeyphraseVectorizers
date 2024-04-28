@@ -24,20 +24,79 @@ class _KeyphraseVectorizerMixin():
     Provides common code for text vectorizers.
     """
 
+    def build_tokenizer(self) -> callable:
+        """
+        Return a function that splits a string into a sequence of tokens.
+
+        Returns
+        -------
+        tokenizer: callable
+              A function to split a string into a sequence of tokens.
+        """
+
+        return self._tokenize
+
+    def _tokenize_simple(self, text: str) -> List[str]:
+        """
+        Simple tokenizer that just splits strings by whitespace.
+
+        Parameters
+        ----------
+        text : str
+                The text to tokenize.
+
+        Returns
+        -------
+        tokens: List[str]
+              A list of tokens.
+        """
+
+        tokens = text.split()
+        return tokens
+
+    def _tokenize(self, text: str) -> List[str]:
+        """
+        Custom word tokenizer for sklearn vectorizer that uses a spaCy pipeline for tokenization.
+
+        Parameters
+        ----------
+        text : str
+                The text to tokenize.
+
+        Returns
+        -------
+        tokens: List[str]
+              A list of tokens.
+        """
+
+        processed_documents, _ = self._get_pos_keyphrases(document_list=[text],
+                                                          stop_words=self.stop_words,
+                                                          spacy_pipeline=self.spacy_pipeline,
+                                                          pos_pattern=self.pos_pattern,
+                                                          lowercase=self.lowercase, workers=self.workers,
+                                                          spacy_exclude=['tok2vec', 'tagger', 'parser',
+                                                                         'attribute_ruler', 'lemmatizer', 'ner',
+                                                                         'textcat'],
+                                                          custom_pos_tagger=self.custom_pos_tagger,
+                                                          extract_keyphrases=False)
+
+        return self._tokenize_simple(processed_documents[0])
+
     def _document_frequency(self, document_keyphrase_count_matrix: List[List[int]]) -> np.array:
         """
         Count the number of non-zero values for each feature in sparse a matrix.
 
         Parameters
         ----------
-        document_keyphrase_count_matrix : list of integer lists
-                The document-keyphrase count matrix to transform to document frequencies
+        document_keyphrase_count_matrix : List[List[int]]
+                The document-keyphrase count matrix to transform to document frequencies.
 
         Returns
         -------
         document_frequencies : np.array
-            Numpy array of document frequencies for keyphrases
+            Numpy array of document frequencies for keyphrases.
         """
+
         document_keyphrase_count_matrix = sp.csr_matrix(document_keyphrase_count_matrix)
         document_frequencies = np.bincount(document_keyphrase_count_matrix.indices,
                                            minlength=document_keyphrase_count_matrix.shape[1])
@@ -307,9 +366,9 @@ class _KeyphraseVectorizerMixin():
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
 
         elif hasattr(stop_words, '__iter__'):
-            stop_words_list = stop_words
+            stop_words_list = set(stop_words)
 
-        # add spaCy POS tags for documents
+        # add spaCy PoS tags for documents
         if not custom_pos_tagger:
             if isinstance(spacy_pipeline, spacy.Language):
                 nlp = spacy_pipeline
@@ -341,11 +400,11 @@ class _KeyphraseVectorizerMixin():
         if workers != 1:
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-        # add document delimiter so we can identify the original document split later
-        doc_delimiter = "|||document_delimiter|||"
+        # add document delimiter, so we can identify the original document split later
+        doc_delimiter = "THISISADOCUMENTDELIMITERNOTAKEYPHRASEPLEASEIGNORE"
         document_list = [doc_delimiter + " " + doc for doc in document_list]
 
-        # split large documents in smaller chunks, so that spaCy can process them without memory issues
+        # split large documents in smaller chunks, so that spacy can process them without memory issues
         docs_list = []
         # set maximal character length of documents for spaCy processing
         max_doc_length = 500
@@ -370,7 +429,19 @@ class _KeyphraseVectorizerMixin():
             pos_tuples = custom_pos_tagger(raw_documents=document_list)
 
         # get the original documents after they were processed by spaCy
-        processed_docs = ' '.join([tup[0].lower() if lowercase else tup[0] for tup in pos_tuples])
+        processed_docs = []
+        for tup in pos_tuples:
+            token = tup[0]
+            if lowercase:
+                token = token.lower()
+            if token not in stop_words_list:
+                processed_docs.append(token)
+        processed_docs = ' '.join(processed_docs)
+
+        # add delimiter to stop_words_list to ignore it during keyphrase extraction
+        stop_words_list.add(doc_delimiter)
+
+        # split processed documents by delimiter
         processed_docs = list(filter(None, [doc.strip() for doc in processed_docs.split(doc_delimiter)]))
 
         if extract_keyphrases:
@@ -382,7 +453,7 @@ class _KeyphraseVectorizerMixin():
             tree = cp.parse(pos_tuples)
             for subtree in tree.subtrees(filter=lambda tuple: tuple.label() == 'CHUNK'):
                 # join candidate keyphrase from single words
-                keyphrase = ' '.join([i[0] for i in subtree.leaves() if i[0] != doc_delimiter])
+                keyphrase = ' '.join([i[0] for i in subtree.leaves() if i[0] not in stop_words_list])
 
                 # convert keyphrase to lowercase
                 if lowercase:

@@ -52,6 +52,7 @@ Table of Contents
    4. [Custom POS-tagger](#custom-pos-tagger)
    5. [PatternRank: Keyphrase extraction with KeyphraseVectorizers and KeyBERT](#patternrank-keyphrase-extraction-with-keyphrasevectorizers-and-keybert)
    6. [Topic modeling with BERTopic and KeyphraseVectorizers](#topic-modeling-with-bertopic-and-keyphrasevectorizers)
+   7. [Online KeyphraseVectorizers](#online-keyphrasevectorizers)
 4. [Citation information](#citation-information)
 
 <!--te-->
@@ -133,7 +134,8 @@ By default, the vectorizer is initialized for the English language. That means, 
 specified, English `stop_words` are removed, and the `pos_pattern` extracts keywords that have 0 or more adjectives,
 followed by 1 or more nouns using the English spaCy part-of-speech tags. In addition, the spaCy pipeline
 components `['parser', 'attribute_ruler', 'lemmatizer', 'ner']` are excluded by default to increase efficiency. If you
-choose a different `spacy_pipeline`, you may have to exclude/include different pipeline components for the spaCy POS
+choose a different `spacy_pipeline`, you may have to exclude/include different pipeline components using
+the `spacy_exclude` parameter for the spaCy POS
 tagger to work properly.
 
 ```python
@@ -214,7 +216,7 @@ tags.
 
 **Attention!** The spaCy pipeline components `['parser', 'attribute_ruler', 'lemmatizer', 'ner']` are excluded by
 default to increase efficiency. If you choose a different `spacy_pipeline`, you may have to exclude/include different
-pipeline components for the spaCy POS tagger to work properly.
+pipeline components using the `spacy_exclude` parameter for the spaCy POS tagger to work properly.
 
 <a name="#keyphrasetfidfvectorizer"/></a>
 
@@ -253,7 +255,13 @@ vectorizer = KeyphraseTfidfVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->>> {'binary': False, 'dtype': <class 'numpy.float64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'norm': 'l2', 'pos_pattern': '<J.*>*<N.*>+', 'smooth_idf': True, 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'sublinear_tf': False, 'use_idf': True, 'workers': 1}
+>> > {'binary': False, 'custom_pos_tagger': None, 'decay': None, 'delete_min_df': None, 'dtype': <
+
+
+class 'numpy.int64'>, 'lowercase': True, 'max_df': None
+
+, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_exclude': ['parser', 'attribute_ruler', 'lemmatizer', 'ner',
+                                                                   'textcat'], 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'workers': 1}
 ```
 
 To calculate tf values instead, set `use_idf=False`.
@@ -663,6 +671,120 @@ topics, probs = topic_model.fit_transform(docs)
   ('chip', 0.010785744492767285)],
  ...
 ```
+
+<a name="#online-keyphrasevectorizers"/></a>
+
+### Online KeyphraseVectorizers
+
+[Back to Table of Contents](#toc)
+
+The KeyphraseVectorizers also support online/incremental updates of their representation (similar to
+the [OnlineCountVectorizer](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html#onlinecountvectorizer)).
+The vectorizer can not only update out-of-vocabulary keyphrases but also implements decay and cleaning functions to
+prevent the sparse document-keyphrases matrix to become too large.
+
+**Parameters for online updates:**
+
+* `decay`: At each iteration, we sum the document-keyphrase representation of the new documents with the
+  document-keyphrase representation of all documents processed thus far. In other words, the document-keyphrase matrix
+  keeps increasing with each iteration. However, especially in a streaming setting, older documents might become less
+  and less relevant as time goes on. Therefore, a decay parameter was implemented that decays the document-keyphrase
+  frequencies at each iteration before adding the document frequencies of new documents. The decay parameter is a value
+  between 0 and 1 and indicates the percentage of frequencies the previous document-keyphrase matrix should be reduced
+  to. For example, a value of .1 will decrease the frequencies in the document-keyphrase matrix by 10% at each iteration
+  before adding the new document-keyphrase matrix. This will make sure that recent data has more weight than previous
+  iterations.
+* `delete_min_df`: We might want to remove keyphrases from the document-keyphrase representation that appear
+  infrequently. The `min_df` parameter works quite well for that. However, when we have a streaming setting,
+  the `min_df` does not work as well since a keyphrases's frequency might start below `min_df` but will end up higher
+  than that over time. Setting that value high might not always be advised. As a result, the list of keyphrases learned
+  by the vectorizer and the resulting document-keyphrase matrix can become quite large. Similarly, if we implement
+  the `decay` parameter, then some values will decrease over time until they are below `min_df`. For these reasons,
+  the `delete_min_df` parameter was implemented. The parameter takes positive integers and indicates, at each iteration,
+  which keyphrases will be removed from the already learned ones. If the value is set to 5, it will check after each
+  iteration if the total frequency of a keyphrase is exceeded by that value. If so, the keyphrase will be removed in its
+  entirety from the list of keyphrases learned by the vectorizer. This helps to keep the document-keyphrase matrix of a
+  manageable size.
+
+#### Example:
+
+```python
+from keyphrase_vectorizers import KeyphraseCountVectorizer
+
+docs = ["""Supervised learning is the machine learning task of learning a function that
+         maps an input to an output based on example input-output pairs. It infers a
+         function from labeled training data consisting of a set of training examples.
+         In supervised learning, each example is a pair consisting of an input object
+         (typically a vector) and a desired output value (also called the supervisory signal). 
+         A supervised learning algorithm analyzes the training data and produces an inferred function, 
+         which can be used for mapping new examples. An optimal scenario will allow for the 
+         algorithm to correctly determine the class labels for unseen instances. This requires 
+         the learning algorithm to generalize from the training data to unseen situations in a 
+         'reasonable' way (see inductive bias).""",
+
+        """Keywords are defined as phrases that capture the main topics discussed in a document. 
+        As they offer a brief yet precise summary of document content, they can be utilized for various applications. 
+        In an information retrieval environment, they serve as an indication of document relevance for users, as the list 
+        of keywords can quickly help to determine whether a given document is relevant to their interest. 
+        As keywords reflect a document's main topics, they can be utilized to classify documents into groups 
+        by measuring the overlap between the keywords assigned to them. Keywords are also used proactively 
+        in information retrieval."""]
+
+# Init default vectorizer.
+vectorizer = KeyphraseCountVectorizer(decay=0.5, delete_min_df=3)
+
+# intitial vectorizer fit
+vectorizer.fit_transform([docs[0]]).toarray()
+>> > array([[1, 1, 3, 1, 1, 3, 1, 3, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 3, 1, 3,
+             1, 1, 1]])
+
+# check learned keyphrases
+print(vectorizer.get_feature_names_out())
+>> > ['output pairs', 'output value', 'function', 'optimal scenario',
+      'pair', 'supervised learning', 'supervisory signal', 'algorithm',
+      'supervised learning algorithm', 'way', 'training examples',
+      'input object', 'example', 'machine', 'output',
+      'unseen situations', 'unseen instances', 'inductive bias',
+      'new examples', 'input', 'task', 'training data', 'class labels',
+      'set', 'vector']
+
+# learn additional keyphrases from new documents with partial fit
+vectorizer.partial_fit([docs[1]])
+vectorizer.transform([docs[1]]).toarray()
+>> > array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 5, 1, 1, 5, 1]])
+
+# check learned keyphrases, including newly learned ones
+print(vectorizer.get_feature_names_out())
+>> > ['output pairs', 'output value', 'function', 'optimal scenario',
+      'pair', 'supervised learning', 'supervisory signal', 'algorithm',
+      'supervised learning algorithm', 'way', 'training examples',
+      'input object', 'example', 'machine', 'output',
+      'unseen situations', 'unseen instances', 'inductive bias',
+      'new examples', 'input', 'task', 'training data', 'class labels',
+      'set', 'vector', 'list', 'various applications',
+      'information retrieval', 'groups', 'overlap', 'main topics',
+      'precise summary', 'document relevance', 'interest', 'indication',
+      'information retrieval environment', 'phrases', 'keywords',
+      'document content', 'documents', 'document', 'users']
+
+# update list of learned keyphrases according to 'delete_min_df'
+vectorizer.update_bow([docs[1]])
+vectorizer.transform([docs[1]]).toarray()
+>> > array([[5, 5]])
+
+# check updated list of learned keyphrases (only the ones that appear more than 'delete_min_df' remain)
+print(vectorizer.get_feature_names_out())
+>> > ['keywords', 'document']
+
+# update again and check the impact of 'decay' on the learned document-keyphrase matrix
+vectorizer.update_bow([docs[1]])
+vectorizer.X_.toarray()
+>> > array([[7.5, 7.5]])
+```
+
+<a name="#citation-information"/></a>
+
 ### Citation information
 
 [Back to Table of Contents](#toc)

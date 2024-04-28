@@ -37,6 +37,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         must be customized accordingly.
         Additionally, the ``pos_pattern`` parameter has to be customized as the `spaCy part-of-speech tags`_  differ between languages.
         Without customizing, the words will be tagged with wrong part-of-speech tags and no stopwords will be considered.
+        In addition, you have to exclude/include different pipeline components using the ``spacy_exclude`` parameter for the spaCy POS tagger to work properly.
 
     Tf means term-frequency while tf-idf means term-frequency times inverse document-frequency.
     This is a common term weighting scheme in information retrieval,
@@ -108,11 +109,24 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         This value is also called cut-off in the literature.
 
     binary : bool, default=False
-        If True, all non zero counts are set to 1.
+        If True, all non-zero counts are set to 1.
         This is useful for discrete probabilistic models that model binary events rather than integer counts.
 
     dtype : type, default=np.int64
         Type of the matrix returned by fit_transform() or transform().
+
+    decay : float, default=None
+          A value between [0, 1] to weight the percentage of frequencies
+          the previous bag-of-words should be decreased. For example,
+          a value of `.1` will decrease the frequencies in the bag-of-words
+          matrix with 10% at each iteration.
+
+    delete_min_df : float, default=None
+          Delete words at each iteration from its vocabulary
+          that are below a minimum frequency.
+          This will keep the resulting bag-of-words matrix small
+          such that it does not explode in size with increasing
+          vocabulary. If `decay` is None then this equals `min_df`.
 
     norm : {'l1', 'l2'}, default='l2'
         Each output row will have unit norm, either:
@@ -137,7 +151,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
                  lowercase: bool = True, workers: int = 1,
                  spacy_exclude: List[str] = ['parser', 'attribute_ruler', 'lemmatizer', 'ner'],
                  custom_pos_tagger: callable = None, max_df: int = None, min_df: int = None,
-                 binary: bool = False, dtype: np.dtype = np.float64, norm: str = "l2",
+                 binary: bool = False, dtype: np.dtype = np.float64, decay: float = None,
+                 delete_min_df: float = None, norm: str = "l2",
                  use_idf: bool = True, smooth_idf: bool = True,
                  sublinear_tf: bool = False):
 
@@ -164,6 +179,8 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         self.min_df = min_df
         self.binary = binary
         self.dtype = dtype
+        self.decay = decay
+        self.delete_min_df = delete_min_df
         self.norm = norm
         self.use_idf = use_idf
         self.smooth_idf = smooth_idf
@@ -175,7 +192,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         super().__init__(spacy_pipeline=self.spacy_pipeline, pos_pattern=self.pos_pattern, stop_words=self.stop_words,
                          lowercase=self.lowercase, workers=self.workers, spacy_exclude=self.spacy_exclude,
                          custom_pos_tagger=self.custom_pos_tagger, max_df=self.max_df, min_df=self.min_df,
-                         binary=self.binary, dtype=self.dtype)
+                         binary=self.binary, dtype=self.dtype, decay=self.decay, delete_min_df=self.delete_min_df)
 
     def _check_params(self):
         """
