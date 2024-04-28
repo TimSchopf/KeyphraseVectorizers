@@ -16,15 +16,18 @@ formats: all
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3.7
   install:
     - requirements: docs/requirements.txt
+    - requirements: requirements.txt
     - method: pip
-  system_packages: true
+      path: .
+      extra_requirements:
+        - docs
+    - method: pip
+      path: another/package
 
 build:
   os: ubuntu-22.04
-  image: latest
   tools:
     python: "3.7"
 
