@@ -23,7 +23,6 @@ python:
       path: .
       extra_requirements:
         - docs
-    - method: pip
 
 build:
   os: ubuntu-22.04
