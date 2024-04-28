@@ -23,6 +23,7 @@ python:
   system_packages: true
 
 build:
+  os: ubuntu-22.04
   image: latest
 
 submodules:

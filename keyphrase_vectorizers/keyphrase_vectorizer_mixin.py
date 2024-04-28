@@ -401,7 +401,7 @@ class _KeyphraseVectorizerMixin():
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
         # add document delimiter, so we can identify the original document split later
-        doc_delimiter = "THISISADOCUMENTDELIMITERNOTAKEYPHRASEPLEASEIGNORE"
+        doc_delimiter = "thisisadocumentdelimiternotakeyphrasepleaseignore"
         document_list = [doc_delimiter + " " + doc for doc in document_list]
 
         # split large documents in smaller chunks, so that spacy can process them without memory issues
