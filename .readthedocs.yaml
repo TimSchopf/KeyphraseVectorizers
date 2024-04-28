@@ -24,7 +24,6 @@ python:
       extra_requirements:
         - docs
     - method: pip
-      path: another/package
 
 build:
   os: ubuntu-22.04
