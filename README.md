@@ -127,11 +127,8 @@ vectorizer = KeyphraseCountVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
-```
-```plaintext
 >>> {'binary': False, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_exclude': ['parser', 'attribute_ruler', 'lemmatizer', 'ner'], 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'workers': 1}
 ```
-
 
 By default, the vectorizer is initialized for the English language. That means, an English `spacy_pipeline` is
 specified, English `stop_words` are removed, and the `pos_pattern` extracts keywords that have 0 or more adjectives,
@@ -258,11 +255,14 @@ vectorizer = KeyphraseTfidfVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
-```
-```plaintext
->>> {'binary': False, 'custom_pos_tagger': None, 'decay': None, 'delete_min_df': None, 'dtype': <class 'numpy.int64'>, 'lowercase': True, 'max_df': None, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_exclude': ['parser', 'attribute_ruler', 'lemmatizer', 'ner','textcat'], 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'workers': 1}
-```
+>>> {'binary': False, 'custom_pos_tagger': None, 'decay': None, 'delete_min_df': None, 'dtype': <
 
+
+class 'numpy.int64'>, 'lowercase': True, 'max_df': None
+
+, 'min_df': None, 'pos_pattern': '<J.*>*<N.*>+', 'spacy_exclude': ['parser', 'attribute_ruler', 'lemmatizer', 'ner',
+                                                                   'textcat'], 'spacy_pipeline': 'en_core_web_sm', 'stop_words': 'english', 'workers': 1}
+```
 
 To calculate tf values instead, set `use_idf=False`.
 
