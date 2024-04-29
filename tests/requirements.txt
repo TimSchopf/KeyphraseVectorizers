@@ -4,4 +4,4 @@ flair==0.11.3
 scipy==1.7.3
 bertopic>=0.16.1
 datasets==2.13.2
-importlib-metadata==6.7.0
+umap-learn==0.5.4
