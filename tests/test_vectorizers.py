@@ -2,6 +2,8 @@ from typing import List
 
 import flair
 import spacy
+from bertopic import BERTopic
+from datasets import load_dataset
 from flair.models import SequenceTagger
 from flair.tokenization import SegtokSentenceSplitter
 from keybert import KeyBERT
@@ -132,3 +134,48 @@ def test_custom_tagger():
     keyphrases = vectorizer.get_feature_names_out()
 
     assert sorted(keyphrases) == sorted_english_test_keyphrases
+
+
+def test_online_vectorizer():
+    first_doc_count_matrix = utils.get_sorted_english_first_doc_count_matrix()
+    second_doc_count_matrix = utils.get_sorted_english_second_doc_count_matrix()
+    first_doc_test_keyphrases = utils.get_english_first_doc_test_keyphrases()
+    english_keyphrases = utils.get_english_test_keyphrases()
+    frequencies_after_min_df = utils.get_frequencies_after_min_df()
+    frequent_keyphrases_after_min_df = utils.get_frequent_keyphrases_after_min_df()
+    frequencies_after_bow = utils.get_frequencies_after_bow()
+
+    # intitial vectorizer fit
+    vectorizer = KeyphraseCountVectorizer(decay=0.5, delete_min_df=3)
+
+    assert [sorted(count_list) for count_list in
+            vectorizer.fit_transform([english_docs[0]]).toarray()] == first_doc_count_matrix
+    assert sorted(vectorizer.get_feature_names_out()) == first_doc_test_keyphrases
+
+    # learn additional keyphrases from new documents with partial fit
+    vectorizer.partial_fit([english_docs[1]])
+
+    assert [sorted(count_list) for count_list in
+            vectorizer.transform([english_docs[1]]).toarray()] == second_doc_count_matrix
+    assert sorted(vectorizer.get_feature_names_out()) == english_keyphrases
+
+    # update list of learned keyphrases according to 'delete_min_df'
+    vectorizer.update_bow([english_docs[1]])
+    assert (vectorizer.transform([english_docs[1]]).toarray() == frequencies_after_min_df).all()
+
+    # check updated list of learned keyphrases (only the ones that appear more than 'delete_min_df' remain)
+    assert sorted(vectorizer.get_feature_names_out()) == frequent_keyphrases_after_min_df
+
+    # update again and check the impact of 'decay' on the learned document-keyphrase matrix
+    vectorizer.update_bow([english_docs[1]])
+    assert (vectorizer.X_.toarray() == frequencies_after_bow).all()
+
+
+def test_bertopic():
+    data = load_dataset("ag_news")
+    texts = data['train']['text']
+    texts = texts[:100]
+    topic_model = BERTopic(vectorizer_model=KeyphraseCountVectorizer())
+    topics, probs = topic_model.fit_transform(documents=texts)
+    new_topics = topic_model.reduce_outliers(texts, topics)
+    topic_model.update_topics(texts, topics=new_topics)

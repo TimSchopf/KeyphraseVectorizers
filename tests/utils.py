@@ -1,3 +1,4 @@
+import numpy as np
 def get_english_test_docs():
     english_docs = ["""Supervised learning is the machine learning task of learning a function that
              maps an input to an output based on example input-output pairs. It infers a
@@ -56,6 +57,36 @@ def get_english_test_keyphrases():
     return sorted_english_test_keyphrases
 
 
+def get_english_first_doc_test_keyphrases():
+    sorted_english_first_doc_test_keyphrases = ['algorithm',
+                                                'class labels',
+                                                'example',
+                                                'function',
+                                                'inductive bias',
+                                                'input',
+                                                'input object',
+                                                'machine',
+                                                'new examples',
+                                                'optimal scenario',
+                                                'output',
+                                                'output pairs',
+                                                'output value',
+                                                'pair',
+                                                'set',
+                                                'supervised learning',
+                                                'supervised learning algorithm',
+                                                'supervisory signal',
+                                                'task',
+                                                'training data',
+                                                'training examples',
+                                                'unseen instances',
+                                                'unseen situations',
+                                                'vector',
+                                                'way']
+
+    return sorted_english_first_doc_test_keyphrases
+
+
 def get_sorted_english_keyphrases_custom_flair_tagger():
     sorted_english_custom_tagger_keyphrases = ['algorithm', 'class labels', 'document', 'document content',
                                                'document relevance',
@@ -102,6 +133,21 @@ def get_sorted_english_count_matrix():
     return sorted_english_count_matrix
 
 
+def get_sorted_english_first_doc_count_matrix():
+    sorted_english_first_doc_count_matrix = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3]]
+
+    return sorted_english_first_doc_count_matrix
+
+
+def get_sorted_english_second_doc_count_matrix():
+    sorted_english_second_doc_count_matrix = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 2, 2, 5, 5]]
+
+    return sorted_english_second_doc_count_matrix
+
+
 def get_sorted_french_count_matrix():
     sorted_french_count_matrix = [[1, 1, 1, 1]]
 
@@ -130,3 +176,21 @@ def get_english_keybert_keyphrases():
          'document content']]
 
     return english_keybert_keyphrases
+
+
+def get_frequencies_after_min_df():
+    frequency_array = np.array([[5, 5]])
+
+    return frequency_array
+
+
+def get_frequencies_after_bow():
+    frequency_array = np.array([[7.5, 7.5]])
+
+    return frequency_array
+
+
+def get_frequent_keyphrases_after_min_df():
+    keyphrases = ['document', 'keywords']
+
+    return keyphrases
