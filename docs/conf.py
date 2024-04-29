@@ -35,7 +35,7 @@ release = main_ns['__version__']
 # ones.
 extensions = [
     'sphinx_rtd_theme',
-    'recommonmark',
+    'myst_parser',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx_markdown_tables',
@@ -64,7 +64,7 @@ html_static_path = []
 master_doc = 'index'
 
 source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
+    '.md': 'myst_parser.parser.MystParser',
 }
 
 source_suffix = ['.rst', '.md']
