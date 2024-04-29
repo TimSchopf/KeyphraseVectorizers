@@ -3,10 +3,10 @@ from typing import List
 import flair
 import spacy
 from bertopic import BERTopic
-from datasets import load_dataset
 from flair.models import SequenceTagger
 from flair.tokenization import SegtokSentenceSplitter
 from keybert import KeyBERT
+from sklearn.datasets import fetch_20newsgroups
 
 import tests.utils as utils
 from keyphrase_vectorizers import KeyphraseCountVectorizer, KeyphraseTfidfVectorizer
@@ -172,9 +172,8 @@ def test_online_vectorizer():
 
 
 def test_bertopic():
-    data = load_dataset("ag_news")
-    texts = data['train']['text']
-    texts = texts[:100]
+    data = fetch_20newsgroups(subset='train')
+    texts = data.data[:100]
     topic_model = BERTopic(vectorizer_model=KeyphraseCountVectorizer())
     topics, probs = topic_model.fit_transform(documents=texts)
     new_topics = topic_model.reduce_outliers(texts, topics)
