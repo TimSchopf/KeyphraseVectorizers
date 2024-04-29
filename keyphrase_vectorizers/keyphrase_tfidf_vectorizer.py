@@ -37,7 +37,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         must be customized accordingly.
         Additionally, the ``pos_pattern`` parameter has to be customized as the `spaCy part-of-speech tags`_  differ between languages.
         Without customizing, the words will be tagged with wrong part-of-speech tags and no stopwords will be considered.
-        In addition, you have to exclude/include different pipeline components using the ``spacy_exclude`` parameter for the spaCy POS tagger to work properly.
+        In addition, you may have to exclude/include different pipeline components using the ``spacy_exclude`` parameter for the spaCy POS tagger to work properly.
 
     Tf means term-frequency while tf-idf means term-frequency times inverse document-frequency.
     This is a common term weighting scheme in information retrieval,
