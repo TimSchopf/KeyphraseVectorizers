@@ -178,6 +178,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.decay = decay
         self.delete_min_df = delete_min_df
         self.running_fit_transform = False
+        self.X_ = None
 
     def fit(self, raw_documents: List[str]) -> object:
         """
@@ -458,11 +459,15 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         that do not exceed `self.delete_min_df` are removed from its
         vocabulary and bag-of-keywords matrix.
 
-        Arguments:
-            raw_documents: A list of documents
+        Parameters
+        ----------
+        raw_documents : iterable
+            An iterable of strings.
 
-        Returns:
-            X_: Bag-of-keywords matrix
+        Returns
+        -------
+        X_ : scipy.sparse.csr_matrix
+            Bag-of-keywords matrix
         """
 
         if hasattr(self, "X_"):

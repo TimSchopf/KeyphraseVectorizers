@@ -185,6 +185,7 @@ class KeyphraseTfidfVectorizer(KeyphraseCountVectorizer):
         self.use_idf = use_idf
         self.smooth_idf = smooth_idf
         self.sublinear_tf = sublinear_tf
+        self.X_ = None
 
         self._tfidf = TfidfTransformer(norm=self.norm, use_idf=self.use_idf, smooth_idf=self.smooth_idf,
                                        sublinear_tf=self.sublinear_tf)
