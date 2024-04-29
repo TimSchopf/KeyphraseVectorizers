@@ -58,31 +58,12 @@ def get_english_test_keyphrases():
 
 
 def get_english_first_doc_test_keyphrases():
-    sorted_english_first_doc_test_keyphrases = ['algorithm',
-                                                'class labels',
-                                                'example',
-                                                'function',
-                                                'inductive bias',
-                                                'input',
-                                                'input object',
-                                                'machine',
-                                                'new examples',
-                                                'optimal scenario',
-                                                'output',
-                                                'output pairs',
-                                                'output value',
-                                                'pair',
-                                                'set',
-                                                'supervised learning',
-                                                'supervised learning algorithm',
-                                                'supervisory signal',
-                                                'task',
-                                                'training data',
-                                                'training examples',
-                                                'unseen instances',
-                                                'unseen situations',
-                                                'vector',
-                                                'way']
+    sorted_english_first_doc_test_keyphrases = ['algorithm', 'class labels', 'example', 'function', 'inductive bias',
+                                                'input', 'input object', 'machine', 'new examples', 'optimal scenario',
+                                                'output', 'output pairs', 'output value', 'pair', 'set',
+                                                'supervised learning', 'supervised learning algorithm',
+                                                'supervisory signal', 'task', 'training data', 'training examples',
+                                                'unseen instances', 'unseen situations', 'vector', 'way']
 
     return sorted_english_first_doc_test_keyphrases
 

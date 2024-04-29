@@ -428,7 +428,7 @@ class _KeyphraseVectorizerMixin():
         else:
             pos_tuples = custom_pos_tagger(raw_documents=document_list)
 
-        # get the original documents after they were processed by spaCy
+        # get the original documents after they were processed by a tokenizer and a POS tagger
         processed_docs = []
         for tup in pos_tuples:
             token = tup[0]
