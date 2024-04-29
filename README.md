@@ -434,7 +434,7 @@ vectorizer.fit(docs)
 keyphrases = vectorizer.get_feature_names_out()
 print(keyphrases)
 
->>>['output value' 'information retrieval' 'algorithm' 'vector' 'groups'
+>> > ['output value' 'information retrieval' 'algorithm' 'vector' 'groups'
  'main topics' 'task' 'precise summary' 'supervised learning'
  'inductive bias' 'information retrieval environment'
  'supervised learning algorithm' 'function' 'input' 'pair'
@@ -790,7 +790,8 @@ vectorizer.X_.toarray()
 [Back to Table of Contents](#toc)
 
 When citing KeyphraseVectorizers or PatternRank in academic papers and theses, please use this BibTeX entry:
-``` 
+
+```plaintext
 @conference{schopf_etal_kdir22,
 author={Tim Schopf and Simon Klimek and Florian Matthes},
 title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction},
