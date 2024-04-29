@@ -178,7 +178,6 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.decay = decay
         self.delete_min_df = delete_min_df
         self.running_fit_transform = False
-        self.X_ = None
 
     def fit(self, raw_documents: List[str]) -> object:
         """
