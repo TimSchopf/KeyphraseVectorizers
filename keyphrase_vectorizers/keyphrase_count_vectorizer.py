@@ -39,7 +39,7 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         must be customized accordingly.
         Additionally, the ``pos_pattern`` parameter has to be customized as the `spaCy part-of-speech tags`_  differ between languages.
         Without customizing, the words will be tagged with wrong part-of-speech tags and no stopwords will be considered.
-        In addition, you have to exclude/include different pipeline components using the ``spacy_exclude`` parameter for the spaCy POS tagger to work properly.
+        In addition, you may have to exclude/include different pipeline components using the ``spacy_exclude`` parameter for the spaCy POS tagger to work properly.
 
     Parameters
     ----------
@@ -458,11 +458,15 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         that do not exceed `self.delete_min_df` are removed from its
         vocabulary and bag-of-keywords matrix.
 
-        Arguments:
-            raw_documents: A list of documents
+        Parameters
+        ----------
+        raw_documents : iterable
+            An iterable of strings.
 
-        Returns:
-            X_: Bag-of-keywords matrix
+        Returns
+        -------
+        X_ : scipy.sparse.csr_matrix
+            Bag-of-keywords matrix
         """
 
         if hasattr(self, "X_"):

@@ -2,3 +2,6 @@ pytest>=7.0.1
 keybert>=0.5.0
 flair==0.11.3
 scipy==1.7.3
+bertopic>=0.16.1
+scikit-learn>=1.0.1
+umap-learn==0.5.4

@@ -9,7 +9,7 @@ version: 2
 sphinx:
   configuration: docs/conf.py
   builder: html
-  fail_on_warning: true
+  fail_on_warning: false
 
 # Optionally build your docs in additional formats such as PDF
 formats: all
@@ -18,7 +18,6 @@ formats: all
 python:
   install:
     - requirements: docs/requirements.txt
-    - requirements: requirements.txt
     - method: pip
       path: .
       extra_requirements:

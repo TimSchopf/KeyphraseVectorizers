@@ -255,7 +255,7 @@ vectorizer = KeyphraseTfidfVectorizer()
 
 # Print parameters
 print(vectorizer.get_params())
->> > {'binary': False, 'custom_pos_tagger': None, 'decay': None, 'delete_min_df': None, 'dtype': <
+>>> {'binary': False, 'custom_pos_tagger': None, 'decay': None, 'delete_min_df': None, 'dtype': <
 
 
 class 'numpy.int64'>, 'lowercase': True, 'max_df': None
@@ -434,7 +434,7 @@ vectorizer.fit(docs)
 keyphrases = vectorizer.get_feature_names_out()
 print(keyphrases)
 
->>>['output value' 'information retrieval' 'algorithm' 'vector' 'groups'
+>>> ['output value' 'information retrieval' 'algorithm' 'vector' 'groups'
  'main topics' 'task' 'precise summary' 'supervised learning'
  'inductive bias' 'information retrieval environment'
  'supervised learning algorithm' 'function' 'input' 'pair'
@@ -735,12 +735,12 @@ vectorizer = KeyphraseCountVectorizer(decay=0.5, delete_min_df=3)
 
 # intitial vectorizer fit
 vectorizer.fit_transform([docs[0]]).toarray()
->> > array([[1, 1, 3, 1, 1, 3, 1, 3, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 3, 1, 3,
+>>> array([[1, 1, 3, 1, 1, 3, 1, 3, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 3, 1, 3,
              1, 1, 1]])
 
 # check learned keyphrases
 print(vectorizer.get_feature_names_out())
->> > ['output pairs', 'output value', 'function', 'optimal scenario',
+>>> ['output pairs', 'output value', 'function', 'optimal scenario',
       'pair', 'supervised learning', 'supervisory signal', 'algorithm',
       'supervised learning algorithm', 'way', 'training examples',
       'input object', 'example', 'machine', 'output',
@@ -751,12 +751,12 @@ print(vectorizer.get_feature_names_out())
 # learn additional keyphrases from new documents with partial fit
 vectorizer.partial_fit([docs[1]])
 vectorizer.transform([docs[1]]).toarray()
->> > array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+>>> array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 5, 1, 1, 5, 1]])
 
 # check learned keyphrases, including newly learned ones
 print(vectorizer.get_feature_names_out())
->> > ['output pairs', 'output value', 'function', 'optimal scenario',
+>>> ['output pairs', 'output value', 'function', 'optimal scenario',
       'pair', 'supervised learning', 'supervisory signal', 'algorithm',
       'supervised learning algorithm', 'way', 'training examples',
       'input object', 'example', 'machine', 'output',
@@ -771,16 +771,16 @@ print(vectorizer.get_feature_names_out())
 # update list of learned keyphrases according to 'delete_min_df'
 vectorizer.update_bow([docs[1]])
 vectorizer.transform([docs[1]]).toarray()
->> > array([[5, 5]])
+>>> array([[5, 5]])
 
 # check updated list of learned keyphrases (only the ones that appear more than 'delete_min_df' remain)
 print(vectorizer.get_feature_names_out())
->> > ['keywords', 'document']
+>>> ['keywords', 'document']
 
 # update again and check the impact of 'decay' on the learned document-keyphrase matrix
 vectorizer.update_bow([docs[1]])
 vectorizer.X_.toarray()
->> > array([[7.5, 7.5]])
+>>> array([[7.5, 7.5]])
 ```
 
 <a name="#citation-information"/></a>
@@ -790,7 +790,8 @@ vectorizer.X_.toarray()
 [Back to Table of Contents](#toc)
 
 When citing KeyphraseVectorizers or PatternRank in academic papers and theses, please use this BibTeX entry:
-``` 
+
+```plaintext
 @conference{schopf_etal_kdir22,
 author={Tim Schopf and Simon Klimek and Florian Matthes},
 title={PatternRank: Leveraging Pretrained Language Models and Part of Speech for Unsupervised Keyphrase Extraction},
