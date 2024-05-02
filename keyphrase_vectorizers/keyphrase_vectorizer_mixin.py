@@ -442,7 +442,7 @@ class _KeyphraseVectorizerMixin():
         stop_words_list.add(doc_delimiter)
 
         # split processed documents by delimiter
-        processed_docs = list(filter(None, [doc.strip() for doc in processed_docs.split(doc_delimiter)]))
+        processed_docs = [doc.strip() for doc in processed_docs.split(doc_delimiter)][1:]
 
         if extract_keyphrases:
             # extract keyphrases that match the NLTK RegexpParser filter
