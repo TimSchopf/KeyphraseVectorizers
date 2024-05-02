@@ -348,7 +348,7 @@ class _KeyphraseVectorizerMixin():
             )
 
 
-        stop_words_list = []
+        stop_words_list = set()
         if isinstance(stop_words, str):
             try:
                 stop_words_list = set(nltk.corpus.stopwords.words(stop_words))
