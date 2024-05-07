@@ -179,6 +179,11 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
         self.delete_min_df = delete_min_df
         self.running_fit_transform = False
 
+    def remove_stopwords(self, text):
+        text = ' '.join([word for word in text.split(' ') if word not in self.stop_words])
+
+        return text
+
     def fit(self, raw_documents: List[str]) -> object:
         """
         Learn the keyphrases that match the defined part-of-speech pattern from the list of raw documents.
@@ -209,7 +214,15 @@ class KeyphraseCountVectorizer(_KeyphraseVectorizerMixin, BaseEstimator):
 
         # remove keyphrases that have more than 8 words, as they are probably no real keyphrases
         # additionally this prevents memory issues during transformation to a document-keyphrase matrix
-        self.keyphrases = [keyphrase for keyphrase in self.keyphrases if len(keyphrase.split()) <= 8]
+        self.keyphrases = [keyphrase for keyphrase in self.keyphrases if len(keyphrase.split()) <= 5]
+
+
+        keys = ' | '.join([key for key in self.keyphrases])
+        if self.stop_words is not None:
+            keys = self.remove_stopwords(keys)
+        keys = keys.replace(' | | ', ' | ')
+        self.keyphrases = list(np.unique(keys.split(' | ')))
+
 
         # compute document frequencies of keyphrases
         if self.max_df or self.min_df:
